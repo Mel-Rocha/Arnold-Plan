@@ -31,39 +31,18 @@ class Command(BaseCommand):
             # Comando para criar a tabela
             create_table_query = '''
             CREATE TABLE CMVColtaco3 (
-                id SERIAL PRIMARY KEY,
-                categoria VARCHAR(100) NOT NULL,
-                numeroAlimento VARCHAR(10) NOT NULL,
-                descricaoAlimento VARCHAR(255) NOT NULL,
-                umidade VARCHAR(20) NOT NULL,
-                energiaKcal VARCHAR(20) NOT NULL,
-                energiaKj VARCHAR(20) NOT NULL,
-                proteina VARCHAR(20) NOT NULL,
-                lipideos VARCHAR(20) NOT NULL,
-                colesterol VARCHAR(20) NOT NULL,
-                carboidrato VARCHAR(20) NOT NULL,
-                fibraAlimentar VARCHAR(20) NOT NULL,
-                cinzas VARCHAR(20) NOT NULL,
-                calcio VARCHAR(20) NOT NULL,
-                magnesio VARCHAR(20) NOT NULL,
-                manganes VARCHAR(20) NOT NULL,
-                fosforo VARCHAR(20) NOT NULL,
-                ferro VARCHAR(20) NOT NULL,
-                sodio VARCHAR(20) NOT NULL,
-                potassio VARCHAR(20) NOT NULL,
-                cobre VARCHAR(20) NOT NULL,
-                zinco VARCHAR(20) NOT NULL,
-                retinol VARCHAR(20) NOT NULL,
-                re VARCHAR(20) NOT NULL,
-                rae VARCHAR(20) NOT NULL,
-                tiamina VARCHAR(20) NOT NULL,
-                riboflavina VARCHAR(20) NOT NULL,
-                piridoxina VARCHAR(20) NOT NULL,
-                niacina VARCHAR(20) NOT NULL,
-                vitaminaC VARCHAR(20) NOT NULL,
-                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );
+    id SERIAL PRIMARY KEY,
+    descricaoAlimento VARCHAR(1000) NOT NULL,
+    umidade VARCHAR(200) NOT NULL,
+    energiaKcal VARCHAR(200) NOT NULL,
+    energiaKj VARCHAR(200) NOT NULL,
+    proteina VARCHAR(200) NOT NULL,
+    lipideos VARCHAR(200) NOT NULL,
+    colesterol VARCHAR(200) NOT NULL,
+    carboidrato VARCHAR(200) NOT NULL,
+    fibraAlimentar VARCHAR(200) NOT NULL,
+    cinzas VARCHAR(200) NOT NULL
+);
             '''
 
             # Executa o comando para criar a tabela

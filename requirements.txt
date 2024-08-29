@@ -15,6 +15,7 @@ djangorestframework==3.13.1
 djangorestframework-simplejwt==5.2.0
 drf-yasg==1.20.0
 drf_api_logger==1.1.10
+et-xmlfile==1.1.0
 idna==3.7
 inflection==0.5.1
 itypes==1.2.0
@@ -36,3 +37,4 @@ uritemplate==4.1.1
 urllib3==2.2.2
 webencodings==0.5.1
 whitenoise==6.6.0
+xlrd==2.0.1
