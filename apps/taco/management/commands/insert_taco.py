@@ -1,9 +1,9 @@
 import os
+
 import xlrd
 import psycopg2
 from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
-
 
 class Command(BaseCommand):
     help = 'Importa dados específicos do arquivo XLS fixo para a tabela CMVColtaco3'
@@ -55,15 +55,21 @@ class Command(BaseCommand):
                         if not descricao.strip():
                             continue
 
-                        umidade = str(row[2].value).replace(',', '.') if row[2].value else '0'
-                        energiaKcal = str(row[3].value).replace(',', '.') if row[3].value else '0'
-                        energiaKj = str(row[4].value).replace(',', '.') if row[4].value else '0'
-                        proteina = str(row[5].value).replace(',', '.') if row[5].value else '0'
-                        lipideos = str(row[6].value).replace(',', '.') if row[6].value else '0'
-                        colesterol = str(row[7].value).replace(',', '.') if row[7].value else '0'
-                        carboidrato = str(row[8].value).replace(',', '.') if row[8].value else '0'
-                        fibraAlimentar = str(row[9].value).replace(',', '.') if row[9].value else '0'
-                        cinzas = str(row[10].value).replace(',', '.') if row[10].value else '0'
+                        def format_value(value):
+                            try:
+                                return f"{float(value):.3f}" if value else '0.000'
+                            except ValueError:
+                                return '0.000'
+
+                        umidade = format_value(row[2].value)
+                        energiaKcal = format_value(row[3].value)
+                        energiaKj = format_value(row[4].value)
+                        proteina = format_value(row[5].value)
+                        lipideos = format_value(row[6].value)
+                        colesterol = format_value(row[7].value)
+                        carboidrato = format_value(row[8].value)
+                        fibraAlimentar = format_value(row[9].value)
+                        cinzas = format_value(row[10].value)
 
                         cursor.execute(
                             """
@@ -90,3 +96,4 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f'Dados importados com sucesso do arquivo {xls_file_path}.'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Erro ao importar dados: {e}'))
+            
