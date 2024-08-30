@@ -24,7 +24,8 @@ class Command(BaseCommand):
                 colesterol VARCHAR(200) NOT NULL,
                 carboidrato VARCHAR(200) NOT NULL,
                 fibraAlimentar VARCHAR(200) NOT NULL,
-                cinzas VARCHAR(200) NOT NULL
+                cinzas VARCHAR(200) NOT NULL,
+                categoria VARCHAR(200) NOT NULL
             );
             '''
 

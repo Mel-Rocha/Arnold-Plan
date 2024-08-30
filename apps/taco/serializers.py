@@ -12,3 +12,4 @@ class CMVColtaco3Serializer(serializers.Serializer):
     carboidrato = serializers.CharField(max_length=200)
     fibraalimentar = serializers.CharField(max_length=200)
     cinzas = serializers.CharField(max_length=200)
+    categoria = serializers.CharField(max_length=200)
