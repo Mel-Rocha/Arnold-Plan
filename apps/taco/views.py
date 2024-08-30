@@ -6,7 +6,9 @@ from .serializers import CMVColtaco3Serializer
 from .utils import get_retention_db_connection
 
 class CMVColtaco3ListView(APIView):
-    def get(self, request):
+
+    @staticmethod
+    def get(request):
         description = request.query_params.get('description', None)
         query = "SELECT * FROM CMVColtaco3"
 
@@ -33,7 +35,9 @@ class CMVColtaco3ListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CMVColtaco3DetailView(APIView):
-    def get(self, request, param, amount):
+
+    @staticmethod
+    def get(request, param, amount):
         try:
             try:
                 amount = float(amount)
