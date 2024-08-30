@@ -64,22 +64,55 @@ class CMVColtaco3DetailView(APIView):
 
 
 class CMVColtaco3CategoryView(APIView):
+    # Lista de categorias predefinidas
+    VALID_CATEGORIES = [
+        "Cereais e derivados",
+        "Verduras, hortaliças e derivados",
+        "Frutas e derivados",
+        "Gorduras e óleos",
+        "Pescados e frutos do mar",
+        "Carnes e derivados",
+        "Leite e derivados",
+        "Bebidas (alcoólicas e não alcoólicas)",
+        "Ovos e derivados",
+        "Produtos açucarados",
+        "Miscelâneas",
+        "Outros alimentos industrializados",
+        "Alimentos preparados",
+        "Leguminosas e derivados",
+        "Nozes e sementes"
+    ]
+
     def get(self, request, category):
+        # Verifica se a categoria fornecida é válida
+        if category not in self.VALID_CATEGORIES:
+            return Response(
+                {
+                    "detail": "Categoria inválida.",
+                    "valid_categories": self.VALID_CATEGORIES
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         query = "SELECT * FROM CMVColtaco3 WHERE category = %s"
         params = [category]
 
         # Executando a query no banco de retenção
-        with get_retention_db_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params)
-                rows = cursor.fetchall()
+        try:
+            with get_retention_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, params)
+                    rows = cursor.fetchall()
 
-                # Captura a descrição das colunas
-                columns = [col[0] for col in cursor.description]
+                    # Captura a descrição das colunas
+                    columns = [col[0] for col in cursor.description]
 
-        # Convertendo os resultados para uma lista de dicionários
-        foods = [dict(zip(columns, row)) for row in rows]
+            # Convertendo os resultados para uma lista de dicionários
+            foods = [dict(zip(columns, row)) for row in rows]
 
-        # Serializando os dados
-        serializer = CMVColtaco3Serializer(foods, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            # Serializando os dados
+            serializer = CMVColtaco3Serializer(foods, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
