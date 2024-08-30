@@ -39,7 +39,7 @@ class CMVColtaco3DetailView(APIView):
                 query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
                 params = [param]
             else:  # Se o parâmetro for uma descrição
-                query = "SELECT * FROM CMVColtaco3 WHERE food_description LIKE %s LIMIT 1"
+                query = "SELECT * FROM CMVColtaco3 WHERE food_description ILIKE %s LIMIT 1"
                 params = [f'%{param}%']
 
             # Executando a query no banco de retenção
