@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from .exceptions import InvalidCategoryError
 from .serializers import CMVColtaco3Serializer
 from .utils import get_retention_db_connection
 
@@ -83,35 +84,13 @@ class CMVColtaco3DetailView(APIView):
 
 
 class CMVColtaco3CategoryView(APIView):
-    # Lista de categorias predefinidas
-    VALID_CATEGORIES = [
-        "Cereais e derivados",
-        "Verduras, hortaliças e derivados",
-        "Frutas e derivados",
-        "Gorduras e óleos",
-        "Pescados e frutos do mar",
-        "Carnes e derivados",
-        "Leite e derivados",
-        "Bebidas (alcoólicas e não alcoólicas)",
-        "Ovos e derivados",
-        "Produtos açucarados",
-        "Miscelâneas",
-        "Outros alimentos industrializados",
-        "Alimentos preparados",
-        "Leguminosas e derivados",
-        "Nozes e sementes"
-    ]
 
-    def get(self, request, category):
-        # Verifica se a categoria fornecida é válida
-        if category not in self.VALID_CATEGORIES:
-            return Response(
-                {
-                    "detail": "Categoria inválida.",
-                    "valid_categories": self.VALID_CATEGORIES
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    @staticmethod
+    def get(request, category):
+        # Verifica se a categoria fornecida é válida usando a exceção personalizada
+        valid_categories = InvalidCategoryError.VALID_CATEGORIES
+        if category not in valid_categories:
+            raise InvalidCategoryError(category)
 
         query = "SELECT * FROM CMVColtaco3 WHERE category = %s"
         params = [category]
