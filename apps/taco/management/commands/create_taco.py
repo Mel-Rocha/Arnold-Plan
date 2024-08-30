@@ -14,19 +14,19 @@ class Command(BaseCommand):
             # Comando para criar a tabela
             create_table_query = '''
             CREATE TABLE CMVColtaco3 (
-                id SERIAL PRIMARY KEY,
-                descricaoAlimento VARCHAR(1000) NOT NULL,
-                umidade VARCHAR(200) NOT NULL,
-                energiaKcal VARCHAR(200) NOT NULL,
-                energiaKj VARCHAR(200) NOT NULL,
-                proteina VARCHAR(200) NOT NULL,
-                lipideos VARCHAR(200) NOT NULL,
-                colesterol VARCHAR(200) NOT NULL,
-                carboidrato VARCHAR(200) NOT NULL,
-                fibraAlimentar VARCHAR(200) NOT NULL,
-                cinzas VARCHAR(200) NOT NULL,
-                categoria VARCHAR(200) NOT NULL
-            );
+            id SERIAL PRIMARY KEY,
+            food_description VARCHAR(1000) NOT NULL,
+            moisture VARCHAR(200) NOT NULL,
+            energy_kcal VARCHAR(200) NOT NULL,
+            energy_kj VARCHAR(200) NOT NULL,
+            protein VARCHAR(200) NOT NULL,
+            lipids VARCHAR(200) NOT NULL,
+            cholesterol VARCHAR(200) NOT NULL,
+            carbohydrates VARCHAR(200) NOT NULL,
+            dietary_fiber VARCHAR(200) NOT NULL,
+            ashes VARCHAR(200) NOT NULL,
+            category VARCHAR(200) NOT NULL
+        );  
             '''
 
             # Executa o comando para criar a tabela

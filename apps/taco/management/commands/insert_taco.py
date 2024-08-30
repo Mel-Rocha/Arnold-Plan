@@ -4,28 +4,28 @@ from django.core.management.base import BaseCommand
 from apps.taco.utils import get_retention_db_connection
 
 class Command(BaseCommand):
-    help = 'Importa dados específicos do arquivo XLS fixo para a tabela CMVColtaco3'
+    help = 'Imports specific data from the fixed XLS file into the CMVColtaco3 table'
 
     def handle(self, *args, **kwargs):
-        # Caminho fixo para o arquivo XLS
+        # Fixed path to the XLS file
         xls_file_path = os.path.join('apps', 'taco', 'data', 'alimentos.xls')
 
-        # Verifica se o arquivo existe
+        # Check if the file exists
         if not os.path.isfile(xls_file_path):
-            self.stdout.write(self.style.ERROR(f'O arquivo XLS {xls_file_path} não foi encontrado.'))
+            self.stdout.write(self.style.ERROR(f'The XLS file {xls_file_path} was not found.'))
             return
 
-        # Conexão com o banco de retenção usando a função utilitária
+        # Connection to the retention database using the utility function
         try:
             with get_retention_db_connection() as connection:
                 with connection.cursor() as cursor:
-                    # Lê o arquivo XLS e insere dados na tabela
+                    # Read the XLS file and insert data into the table
                     workbook = xlrd.open_workbook(xls_file_path)
                     sheet = workbook.sheet_by_index(0)
 
-                    categoria_atual = None
+                    current_category = None
 
-                    # Lista de textos indicativos para ignorar
+                    # List of texts to ignore
                     discard_text = [
                         "Número do Alimento", "Descrição dos alimentos",
                         "as análises estão sendo reavaliadas",
@@ -37,11 +37,11 @@ class Command(BaseCommand):
                         "Valores retirados do livro Fontes brasileiras de carotenóides: tabela brasileira de composição de carotenóides em alimentos."
                     ]
 
-                    # Itera sobre as linhas da planilha
+                    # Iterate over the rows in the sheet
                     for row_idx in range(sheet.nrows):
                         row = sheet.row(row_idx)
 
-                        # Verifica se a linha contém uma categoria
+                        # Check if the row contains a category
                         if row[0].value in [
                             "Cereais e derivados",
                             "Verduras, hortaliças e derivados",
@@ -59,17 +59,17 @@ class Command(BaseCommand):
                             "Leguminosas e derivados",
                             "Nozes e sementes"
                         ]:
-                            categoria_atual = row[0].value
-                            continue  # Pular a linha de categoria
+                            current_category = row[0].value
+                            continue  # Skip the category row
 
-                        # Ignora linhas que contêm texto indicativo ou valores estranhos
+                        # Ignore rows that contain indicative text or strange values
                         if any(cell.value in discard_text for cell in row):
                             continue
 
-                        descricao = (row[1].value if row[1].value else '')[:1000]  # Truncar para 1000 caracteres
+                        description = (row[1].value if row[1].value else '')[:1000]  # Truncate to 1000 characters
 
-                        # Verifica se a descrição está vazia ou nula
-                        if not descricao.strip():
+                        # Check if the description is empty or null
+                        if not description.strip():
                             continue
 
                         def format_value(value):
@@ -78,39 +78,40 @@ class Command(BaseCommand):
                             except ValueError:
                                 return '0.000'
 
-                        umidade = format_value(row[2].value)
-                        energiaKcal = format_value(row[3].value)
-                        energiaKj = format_value(row[4].value)
-                        proteina = format_value(row[5].value)
-                        lipideos = format_value(row[6].value)
-                        colesterol = format_value(row[7].value)
-                        carboidrato = format_value(row[8].value)
-                        fibraAlimentar = format_value(row[9].value)
-                        cinzas = format_value(row[10].value)
+                        moisture = format_value(row[2].value)
+                        energy_kcal = format_value(row[3].value)
+                        energy_kj = format_value(row[4].value)
+                        protein = format_value(row[5].value)
+                        lipids = format_value(row[6].value)
+                        cholesterol = format_value(row[7].value)
+                        carbohydrates = format_value(row[8].value)
+                        dietary_fiber = format_value(row[9].value)
+                        ashes = format_value(row[10].value)
 
                         cursor.execute(
                             """
                             INSERT INTO CMVColtaco3 (
-                                descricaoAlimento, umidade, energiaKcal, energiaKj, proteina, lipideos,
-                                colesterol, carboidrato, fibraAlimentar, cinzas, categoria
+                                food_description, moisture, energy_kcal, energy_kj, protein, lipids,
+                                cholesterol, carbohydrates, dietary_fiber, ashes, category
                             )
                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                             """,
                             (
-                                descricao,
-                                umidade,
-                                energiaKcal,
-                                energiaKj,
-                                proteina,
-                                lipideos,
-                                colesterol,
-                                carboidrato,
-                                fibraAlimentar,
-                                cinzas,
-                                categoria_atual  # Adiciona a categoria
+                                description,
+                                moisture,
+                                energy_kcal,
+                                energy_kj,
+                                protein,
+                                lipids,
+                                cholesterol,
+                                carbohydrates,
+                                dietary_fiber,
+                                ashes,
+                                current_category  # Add the category
                             )
                         )
                     connection.commit()
-                    self.stdout.write(self.style.SUCCESS(f'Dados importados com sucesso do arquivo {xls_file_path}.'))
+                    self.stdout.write(self.style.SUCCESS(f'Data successfully imported from the file {xls_file_path}.'))
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f'Erro ao importar dados: {e}'))
+            self.stdout.write(self.style.ERROR(f'Error importing data: {e}'))
+
