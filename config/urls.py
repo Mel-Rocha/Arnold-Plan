@@ -43,4 +43,5 @@ urlpatterns = [
     path('macros-sheet/', include('apps.macros_sheet.urls')),
     path('meal/', include('apps.meal.urls')),
     path('food_options/', include('apps.food_options.urls')),
+    path('taco/', include('apps.taco.urls')),
     ]
