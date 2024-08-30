@@ -92,6 +92,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Retention
+DATABASE_RETENTION_CONFIG = {
+    "DATABASE_RETENTION": config("DATABASE_RETENTION"),
+    "PG_USER_RETENTION": config("PG_USER_RETENTION"),
+    "PG_PASSWORD_RETENTION": config("PG_PASSWORD_RETENTION"),
+    "PG_HOST_RETENTION": config("PG_HOST_RETENTION"),
+    "PG_PORT_RETENTION": config("PG_PORT_RETENTION"),
+}
+
+
+# Local
 if not DEBUG:
     DATABASES = {
         'default': {

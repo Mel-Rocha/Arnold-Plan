@@ -1,23 +1,14 @@
 import os
 
 import xlrd
-import psycopg2
 from django.core.management.base import BaseCommand
-from dotenv import load_dotenv
+
+from apps.taco.utils import get_retention_db_connection
 
 class Command(BaseCommand):
     help = 'Importa dados específicos do arquivo XLS fixo para a tabela CMVColtaco3'
 
     def handle(self, *args, **kwargs):
-        # Carrega variáveis do arquivo .env
-        load_dotenv()
-
-        # Variáveis de ambiente do banco de retenção
-        PG_HOST_RETENTION = os.getenv("PG_HOST_RETENTION")
-        PG_PORT_RETENTION = os.getenv("PG_PORT_RETENTION")
-        PG_USER_RETENTION = os.getenv("PG_USER_RETENTION")
-        PG_PASSWORD_RETENTION = os.getenv("PG_PASSWORD_RETENTION")
-        DATABASE_RETENTION = os.getenv("DATABASE_RETENTION")
 
         # Caminho fixo para o arquivo XLS
         xls_file_path = os.path.join('apps', 'taco', 'data', 'alimentos.xls')
@@ -27,15 +18,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f'O arquivo XLS {xls_file_path} não foi encontrado.'))
             return
 
-        # Conexão com o banco de retenção usando psycopg2
+        # Conexão com o banco de retenção usando a função utilitária
         try:
-            with psycopg2.connect(
-                    host=PG_HOST_RETENTION,
-                    port=PG_PORT_RETENTION,
-                    user=PG_USER_RETENTION,
-                    password=PG_PASSWORD_RETENTION,
-                    database=DATABASE_RETENTION
-            ) as connection:
+            with get_retention_db_connection() as connection:
                 with connection.cursor() as cursor:
                     # Lê o arquivo XLS e insere dados na tabela
                     workbook = xlrd.open_workbook(xls_file_path)
@@ -96,4 +81,3 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f'Dados importados com sucesso do arquivo {xls_file_path}.'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Erro ao importar dados: {e}'))
-            

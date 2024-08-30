@@ -1,48 +1,31 @@
 from django.core.management.base import BaseCommand
-import psycopg2
-import os
-from dotenv import load_dotenv
+
+from apps.taco.utils import get_retention_db_connection
 
 class Command(BaseCommand):
     help = 'Cria a tabela CMVColtaco3 no banco de retenção'
 
     def handle(self, *args, **kwargs):
-        # Carrega variáveis do arquivo .env
-        load_dotenv()
-
-        # Variáveis de ambiente do banco de retenção
-        PG_HOST_RETENTION = os.getenv("PG_HOST_RETENTION")
-        PG_PORT_RETENTION = os.getenv("PG_PORT_RETENTION")
-        PG_USER_RETENTION = os.getenv("PG_USER_RETENTION")
-        PG_PASSWORD_RETENTION = os.getenv("PG_PASSWORD_RETENTION")
-        DATABASE_RETENTION = os.getenv("DATABASE_RETENTION")
-
         # Conexão com o banco de retenção
         try:
-            connection = psycopg2.connect(
-                host=PG_HOST_RETENTION,
-                port=PG_PORT_RETENTION,
-                user=PG_USER_RETENTION,
-                password=PG_PASSWORD_RETENTION,
-                database=DATABASE_RETENTION
-            )
+            connection = get_retention_db_connection()
             cursor = connection.cursor()
 
             # Comando para criar a tabela
             create_table_query = '''
             CREATE TABLE CMVColtaco3 (
-    id SERIAL PRIMARY KEY,
-    descricaoAlimento VARCHAR(1000) NOT NULL,
-    umidade VARCHAR(200) NOT NULL,
-    energiaKcal VARCHAR(200) NOT NULL,
-    energiaKj VARCHAR(200) NOT NULL,
-    proteina VARCHAR(200) NOT NULL,
-    lipideos VARCHAR(200) NOT NULL,
-    colesterol VARCHAR(200) NOT NULL,
-    carboidrato VARCHAR(200) NOT NULL,
-    fibraAlimentar VARCHAR(200) NOT NULL,
-    cinzas VARCHAR(200) NOT NULL
-);
+                id SERIAL PRIMARY KEY,
+                descricaoAlimento VARCHAR(1000) NOT NULL,
+                umidade VARCHAR(200) NOT NULL,
+                energiaKcal VARCHAR(200) NOT NULL,
+                energiaKj VARCHAR(200) NOT NULL,
+                proteina VARCHAR(200) NOT NULL,
+                lipideos VARCHAR(200) NOT NULL,
+                colesterol VARCHAR(200) NOT NULL,
+                carboidrato VARCHAR(200) NOT NULL,
+                fibraAlimentar VARCHAR(200) NOT NULL,
+                cinzas VARCHAR(200) NOT NULL
+            );
             '''
 
             # Executa o comando para criar a tabela
