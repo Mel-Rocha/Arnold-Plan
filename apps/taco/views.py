@@ -33,8 +33,13 @@ class CMVColtaco3ListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CMVColtaco3DetailView(APIView):
-    def get(self, request, param):
+    def get(self, request, param, amount):
         try:
+            try:
+                amount = float(amount)
+            except ValueError:
+                return Response({"detail": "O parâmetro 'amount' deve ser um número válido."}, status=status.HTTP_400_BAD_REQUEST)
+
             if param.isdigit():  # Se o parâmetro for um ID
                 query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
                 params = [param]
@@ -51,10 +56,20 @@ class CMVColtaco3DetailView(APIView):
                     if row:
                         # Captura a descrição das colunas
                         columns = [col[0] for col in cursor.description]
-                        alimento = dict(zip(columns, row))
+                        food = dict(zip(columns, row))
+
+                        # Ajustando valores com base no 'amount'
+                        for key in food:
+                            if key not in ['id', 'food_description', 'category']:
+                                try:
+                                    value = float(food[key])
+                                    food[key] = round((value * amount) / 100, 3)
+                                except ValueError:
+                                    # Se a conversão para float falhar, mantém o valor original
+                                    continue
 
                         # Serializando o dado
-                        serializer = CMVColtaco3Serializer(alimento)
+                        serializer = CMVColtaco3Serializer(food)
                         return Response(serializer.data, status=status.HTTP_200_OK)
                     else:
                         return Response({"detail": "Alimento não encontrado."}, status=status.HTTP_404_NOT_FOUND)
