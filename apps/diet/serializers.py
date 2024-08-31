@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.macros_sheet.models import MacrosSheet
 from apps.meal.models import Meal
 from apps.diet.models import Diet
 from apps.user.models import Nutritionist
@@ -24,6 +25,7 @@ class DietSerializer(serializers.ModelSerializer):
         except Nutritionist.DoesNotExist:
             raise serializers.ValidationError({'nutritionist': 'Nutritionist with the current user does not exist.'})
 
+        # Criação da Diet
         diet = Diet.objects.create(nutritionist=nutritionist, **validated_data)
 
         # Definindo as refeições padrão
@@ -38,12 +40,18 @@ class DietSerializer(serializers.ModelSerializer):
         for meal_data in default_meals:
             Meal.objects.create(diet=diet, **meal_data)
 
+        # Criação das MacrosSheets baseadas nas semanas
+        weeks = validated_data.get('weeks', 0)
+        for week in range(1, weeks + 1):
+            MacrosSheet.objects.create(diet=diet, week=week)
+
         return diet
 
     def update(self, instance, validated_data):
         meals_data = validated_data.pop('meals', [])
         instance = super().update(instance, validated_data)
 
+        # Atualizando ou criando refeições
         for meal_data in meals_data:
             meal_id = meal_data.get('id')
             if meal_id:
@@ -59,5 +67,18 @@ class DietSerializer(serializers.ModelSerializer):
                     meal_serializer.save(diet=instance)
                 else:
                     raise serializers.ValidationError(meal_serializer.errors)
+
+        # Atualizando o número de MacrosSheets
+        weeks = validated_data.get('weeks', 0)
+        current_weeks = instance.macros_sheets.count()
+
+        if weeks > current_weeks:
+            for week in range(current_weeks + 1, weeks + 1):
+                MacrosSheet.objects.create(diet=instance, week=week)
+        elif weeks < current_weeks:
+            # Remover semanas extras, se necessário
+            excess_weeks = instance.macros_sheets.filter(week__gt=weeks)
+            for macros_sheet in excess_weeks:
+                macros_sheet.delete()
 
         return instance
