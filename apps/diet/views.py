@@ -11,7 +11,8 @@ class DietViewSet(viewsets.ModelViewSet):
 
     @swagger_safe(Diet)
     def get_queryset(self):
-        return Diet.objects.all()
+        queryset = Diet.objects.select_related('nutritionist').prefetch_related('meals').all()
+        return queryset
 
     def perform_create(self, serializer):
         if not IsNutritionistUser().has_permission(self.request, self):

@@ -12,7 +12,7 @@ class TypeOfMeal(models.TextChoices):
 
 
 class Meal(Core):
-    diet = models.ForeignKey(Diet, on_delete=models.CASCADE, default=None)
+    diet = models.ForeignKey(Diet, related_name='meals', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     time = models.TimeField(default='00:00:00')
     type_of_meal = models.CharField(max_length=50, choices=TypeOfMeal.choices, default=TypeOfMeal.ORDINARY)
