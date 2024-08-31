@@ -36,11 +36,8 @@ class MealSerializer(serializers.ModelSerializer):
             if not (1 <= food_id <= 597):
                 raise serializers.ValidationError("Food ID must be between 1 and 597.")
 
-            # Buscar os detalhes completos do alimento no banco de retenção
-            food_details = self.get_food_details(food_id)
-
-            # Adicionar a quantidade ao dicionário de detalhes do alimento
-            food_details['quantity'] = quantity
+            # Buscar os detalhes completos do alimento no banco de retenção e ajustar valores
+            food_details = self.get_food_details(food_id, quantity)
 
             # Adicionar os detalhes completos do alimento à lista de foods da refeição
             meal.foods.append(food_details)
@@ -61,11 +58,8 @@ class MealSerializer(serializers.ModelSerializer):
             if not (1 <= food_id <= 597):
                 raise serializers.ValidationError("Food ID must be between 1 and 597.")
 
-            # Buscar os detalhes completos do alimento no banco de retenção
-            food_details = self.get_food_details(food_id)
-
-            # Adicionar a quantidade ao dicionário de detalhes do alimento
-            food_details['quantity'] = quantity
+            # Buscar os detalhes completos do alimento no banco de retenção e ajustar valores
+            food_details = self.get_food_details(food_id, quantity)
 
             # Adicionar os detalhes completos do alimento à lista de foods da refeição
             instance.foods.append(food_details)
@@ -73,9 +67,8 @@ class MealSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def get_food_details(self, food_id):
-        # Implementação para buscar os detalhes do alimento no banco de retenção
-        # Aqui você pode replicar a lógica de busca usada no CMVColtaco3BulkDetailView
+    def get_food_details(self, food_id, amount):
+        # Implementação para buscar os detalhes do alimento no banco de retenção e ajustar valores
         query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
         params = [food_id]
 
@@ -86,6 +79,21 @@ class MealSerializer(serializers.ModelSerializer):
 
                 if row:
                     columns = [col[0] for col in cursor.description]
-                    return dict(zip(columns, row))
+                    food = dict(zip(columns, row))
+
+                    # Ajustar os valores com base no 'amount'
+                    for key in food:
+                        if key not in ['id', 'food_description', 'category']:
+                            try:
+                                value = float(food[key])
+                                food[key] = round((value * amount) / 100, 3)
+                            except ValueError:
+                                # Se a conversão para float falhar, mantém o valor original
+                                continue
+
+                    # Adicionar a quantidade ao dicionário de detalhes do alimento
+                    food['quantity'] = amount
+
+                    return food
                 else:
                     raise serializers.ValidationError(f"Alimento com ID {food_id} não encontrado.")
