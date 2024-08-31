@@ -1,4 +1,5 @@
 import psycopg2
+from rest_framework.pagination import PageNumberPagination
 
 from config.settings import DATABASE_RETENTION_CONFIG
 
@@ -13,3 +14,9 @@ def get_retention_db_connection():
         port=DATABASE_RETENTION_CONFIG["PG_PORT_RETENTION"],
     )
     return connection
+
+
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 10  # Número de itens por página padrão
+    page_size_query_param = 'page_size'
+    max_page_size = 100  # Máximo de itens por página

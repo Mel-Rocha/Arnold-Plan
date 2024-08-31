@@ -14,29 +14,57 @@ class CMVColtaco3ListView(APIView):
     @staticmethod
     def get(request):
         description = request.query_params.get('description', None)
-        query = "SELECT * FROM CMVColtaco3"
+        page = int(request.query_params.get('page', 1))  # Página atual
+        page_size = int(request.query_params.get('page_size', 10))  # Tamanho da página
 
+        # Construa a query para obter o total de registros
+        count_query = "SELECT COUNT(*) FROM CMVColtaco3"
+        if description:
+            count_query += " WHERE food_description LIKE %s"
+            count_params = [f'%{description}%']
+        else:
+            count_params = []
+
+        with get_retention_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(count_query, count_params)
+                total_records = cursor.fetchone()[0]
+
+        # Construa a query para obter os registros paginados
+        query = "SELECT * FROM CMVColtaco3"
         if description:
             query += " WHERE food_description LIKE %s"
-            params = [f'%{description}%']
-        else:
-            params = []
+        query += " LIMIT %s OFFSET %s"
+        params = []
+        if description:
+            params.append(f'%{description}%')
+        params.extend([page_size, (page - 1) * page_size])
 
-        # Executando a query no banco de retenção
+        # Execute a query no banco de retenção
         with get_retention_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
-
-                # Captura a descrição das colunas
                 columns = [col[0] for col in cursor.description]
 
-        # Convertendo os resultados para uma lista de dicionários
         foods = [dict(zip(columns, row)) for row in rows]
 
         # Serializando os dados
         serializer = CMVColtaco3Serializer(foods, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Calcular total de páginas
+        total_pages = (total_records + page_size - 1) // page_size
+
+        # Montar a resposta com informações de paginação
+        response_data = {
+            'total_records': total_records,
+            'total_pages': total_pages,
+            'current_page': page,
+            'page_size': page_size,
+            'results': serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class CMVColtaco3DetailView(APIView):
