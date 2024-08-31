@@ -1,18 +1,19 @@
-from rest_framework import status, viewsets
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import MethodNotAllowed
 
 from apps.macros_sheet.models import MacrosSheet
 from apps.macros_sheet.serializers import MacrosSheetSerializer
-from apps.diet.models import Diet
+
 
 class MacrosSheetViewSet(viewsets.ModelViewSet):
     queryset = MacrosSheet.objects.all()
     serializer_class = MacrosSheetSerializer
     permission_classes = [IsAuthenticated]
+
+    # Permitir apenas GET e PATCH
+    http_method_names = ['get', 'patch']
 
     def get_queryset(self):
         diet_id = self.kwargs.get('diet_id')
@@ -24,3 +25,11 @@ class MacrosSheetViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, pk=self.kwargs.get('pk'))
         return obj
+
+    def create(self, request, *args, **kwargs):
+        # Desativa a criação
+        raise MethodNotAllowed(method='POST')
+
+    def destroy(self, request, *args, **kwargs):
+        # Desativa a exclusão
+        raise MethodNotAllowed(method='DELETE')
