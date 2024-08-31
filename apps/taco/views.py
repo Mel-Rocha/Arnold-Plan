@@ -194,10 +194,10 @@ class CMVColtaco3BulkDetailView(APIView):
             results = []
 
             for item in food_list:
-                if not isinstance(item, dict) or 'id_food' not in item or 'quantity' not in item:
+                if not isinstance(item, dict) or 'food_id' not in item or 'quantity' not in item:
                     return Response({"detail": "Cada item na lista deve ser um dicionário contendo as chaves 'id_food' e 'quantity'."}, status=status.HTTP_400_BAD_REQUEST)
 
-                food_id = item['id_food']
+                food_id = item['food_id']
                 amount = item['quantity']
 
                 try:
