@@ -10,6 +10,17 @@ from apps.taco.utils import get_retention_db_connection
 
 
 class CMVColtaco3ListView(APIView):
+    """
+    Objective: List all foods, paged.
+
+    Parameters:
+    optional:
+    - page: (int) Page number.
+    - page_size: (int) Number of records per page.
+
+    Returns:
+    JSON.
+    """
 
     @staticmethod
     def get(request):
@@ -68,6 +79,18 @@ class CMVColtaco3ListView(APIView):
 
 
 class CMVColtaco3DetailView(APIView):
+    """
+    Objective: Calculates the nutritional values of the food based on the amount in grams informed.
+
+    Parameters:
+    mandatory:
+    - param: (str) Description or ID of the food.
+    - amount: (str) Amount in grams.
+
+    Returns:
+    JSON.
+    """
+
     @staticmethod
     def get(request, param, amount):
         try:
@@ -121,6 +144,20 @@ class CMVColtaco3DetailView(APIView):
 
 
 class CMVColtaco3CategoryView(APIView):
+    """
+    Objective: List all foods in a specific category, paged.
+
+    Parameters:
+    mandatory:
+    - category: (str) Category of the food.
+
+    optional:
+    - page: (int) Page number.
+    - page_size: (int) Number of records per page.
+
+    Returns:
+    JSON.
+    """
 
     @staticmethod
     def get(request, category):
@@ -178,6 +215,16 @@ class CMVColtaco3CategoryView(APIView):
 
 
 class CMVColtaco3BulkDetailView(APIView):
+    """
+    Objective: Calculates the nutritional values of the food based on the amount in grams informed,
+    can be used for a single food or many.
+
+    Parameters:
+    - food_list: List of dictionaries containing the 'food_id' and 'quantity' keys.
+
+    Returns:
+    JSON, list of dictionaries.
+    """
 
     @staticmethod
     def get(request, food_list):
