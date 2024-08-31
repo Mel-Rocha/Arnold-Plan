@@ -1,4 +1,5 @@
 import ast
+import difflib
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -37,6 +38,7 @@ class CMVColtaco3ListView(APIView):
         serializer = CMVColtaco3Serializer(foods, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class CMVColtaco3DetailView(APIView):
 
     @staticmethod
@@ -48,11 +50,17 @@ class CMVColtaco3DetailView(APIView):
                 return Response({"detail": "O parâmetro 'amount' deve ser um número válido."}, status=status.HTTP_400_BAD_REQUEST)
 
             if param.isdigit():  # Se o parâmetro for um ID
-                query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
+                query = "SELECT * FROM CMVColtaco3 WHERE id = %s LIMIT 1"
                 params = [param]
             else:  # Se o parâmetro for uma descrição
-                query = "SELECT * FROM CMVColtaco3 WHERE food_description ILIKE %s LIMIT 1"
-                params = [f'%{param}%']
+                query = """
+                SELECT * 
+                FROM CMVColtaco3
+                WHERE food_description ILIKE %s
+                ORDER BY similarity(food_description, %s) DESC
+                LIMIT 1
+                """
+                params = [f'%{param}%', param]
 
             # Executando a query no banco de retenção
             with get_retention_db_connection() as conn:
@@ -72,7 +80,6 @@ class CMVColtaco3DetailView(APIView):
                                     value = float(food[key])
                                     food[key] = round((value * amount) / 100, 3)
                                 except ValueError:
-                                    # Se a conversão para float falhar, mantém o valor original
                                     continue
 
                         # Serializando o dado
