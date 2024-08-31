@@ -6,7 +6,7 @@ from django.db.models.signals import pre_delete
 from django.core.validators import MinValueValidator
 
 from apps.core.models import Core
-from apps.macros_planner.models import MacrosPlanner
+from apps.diet.models import Diet
 from apps.macros_sheet.calcs import KcalLevel, CalcMacroLevel, ProportionGKG
 
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class MacrosSheet(Core):
-    macros_planner = models.ForeignKey(MacrosPlanner, related_name='macros_sheets', on_delete=models.CASCADE)
+    diet = models.ForeignKey(Diet, related_name='macros_sheets', on_delete=models.CASCADE)
     week = models.PositiveIntegerField(default=0)
     cho = models.FloatField(default=1, validators=[MinValueValidator(1)])
     ptn = models.FloatField(default=1, validators=[MinValueValidator(1)])
@@ -23,7 +23,7 @@ class MacrosSheet(Core):
 
     @property
     def athlete(self):
-        return self.macros_planner.athlete
+        return self.diet.athlete
 
     @property
     def weight(self):
@@ -62,8 +62,8 @@ class MacrosSheet(Core):
 
 
     def update_week_based_on_id(self):
-        if self.week == 0 and self.macros_planner:
-            macros_sheets = self.macros_planner.macros_sheets.all().order_by('id')
+        if self.week == 0 and self.diet:
+            macros_sheets = self.diet.macros_sheets.all().order_by('id')
 
             for index, macros_sheet in enumerate(macros_sheets):
                 macros_sheet.week = index + 1
@@ -71,7 +71,7 @@ class MacrosSheet(Core):
 
             new_week = macros_sheets.last().week + 1 if macros_sheets.exists() else 1
             self.week = new_week
-            self.macros_planner.save()
+            self.diet.save()
 
 
     def save(self, *args, **kwargs):

@@ -3,8 +3,6 @@ from rest_framework import serializers
 from apps.meal.models import Meal
 from apps.diet.models import Diet
 from apps.meal.serializers import MealSerializer
-from apps.food_options.models import FoodOptions
-from apps.macros_planner.models import MacrosPlanner
 
 
 class DietSerializer(serializers.ModelSerializer):
@@ -13,14 +11,9 @@ class DietSerializer(serializers.ModelSerializer):
     class Meta:
         model = Diet
         fields = '__all__'
-        extra_kwargs = {
-            'macros_planner': {'read_only': True}
-        }
 
     def create(self, validated_data):
-        macros_planner_id = self.context['macros_planner_id']
-        macros_planner = MacrosPlanner.objects.get(id=macros_planner_id)
-        diet = Diet.objects.create(macros_planner=macros_planner, **validated_data)
+        diet = Diet.objects.create(**validated_data)
 
         # Definindo as refeições padrão
         default_meals = [
