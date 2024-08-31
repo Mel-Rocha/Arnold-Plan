@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
-from apps.macros_sheet.models import MacrosSheet
 from apps.meal.models import Meal
 from apps.diet.models import Diet
 from apps.user.models import Nutritionist
 from apps.meal.serializers import MealSerializer
+from apps.macros_sheet.models import MacrosSheet
 
 
 class DietSerializer(serializers.ModelSerializer):

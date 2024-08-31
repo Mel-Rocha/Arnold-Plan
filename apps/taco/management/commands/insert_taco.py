@@ -1,8 +1,11 @@
 import os
+import re
+
 import xlrd
 from django.core.management.base import BaseCommand
+
 from apps.taco.utils import get_retention_db_connection
-import re
+
 
 class Command(BaseCommand):
     help = 'Imports specific data from the fixed XLS file into the CMVColtaco3 table'
@@ -122,4 +125,3 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f'Data successfully imported from the file {xls_file_path}.'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Error importing data: {e}'))
-

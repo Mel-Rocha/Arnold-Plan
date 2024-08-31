@@ -3,8 +3,8 @@ from rest_framework.exceptions import NotFound
 
 from apps.meal.models import Meal
 from apps.diet.models import Diet
-from apps.meal.serializers import MealSerializer
 from config.urls import swagger_safe
+from apps.meal.serializers import MealSerializer
 
 
 class MealViewSet(viewsets.ModelViewSet):

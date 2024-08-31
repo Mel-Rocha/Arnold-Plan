@@ -1,13 +1,13 @@
 import ast
-import difflib
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .exceptions import InvalidCategoryError
-from .serializers import CMVColtaco3Serializer
-from .utils import get_retention_db_connection
+from apps.taco.exceptions import InvalidCategoryError
+from apps.taco.serializers import CMVColtaco3Serializer
+from apps.taco.utils import get_retention_db_connection
+
 
 class CMVColtaco3ListView(APIView):
 

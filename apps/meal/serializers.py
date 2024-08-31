@@ -1,9 +1,11 @@
-from rest_framework import serializers
-from apps.meal.models import Meal
-from apps.diet.models import Diet
 import logging
 
+from rest_framework import serializers
+
+from apps.meal.models import Meal
+from apps.diet.models import Diet
 from apps.taco.utils import get_retention_db_connection
+
 
 # Configurar logging
 logging.basicConfig(level=logging.DEBUG)

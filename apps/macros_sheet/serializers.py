@@ -1,6 +1,8 @@
 from rest_framework import serializers
+
 from apps.diet.models import Diet
 from apps.macros_sheet.models import MacrosSheet
+
 
 class MacrosSheetSerializer(serializers.ModelSerializer):
     kcal = serializers.ReadOnlyField()

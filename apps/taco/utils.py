@@ -4,7 +4,6 @@ from rest_framework.pagination import PageNumberPagination
 from config.settings import DATABASE_RETENTION_CONFIG
 
 
-
 def get_retention_db_connection():
     connection = psycopg2.connect(
         dbname=DATABASE_RETENTION_CONFIG["DATABASE_RETENTION"],

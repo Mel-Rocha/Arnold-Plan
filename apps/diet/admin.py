@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 from apps.diet.models import Diet
-from apps.meal.models import Meal
 
 
 @admin.register(Diet)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+
 class CMVColtaco3Serializer(serializers.Serializer):
     id = serializers.IntegerField()
     food_description = serializers.CharField(max_length=1000)

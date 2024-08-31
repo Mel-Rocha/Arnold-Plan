@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
+
 from apps.taco.utils import get_retention_db_connection
+
 
 class Command(BaseCommand):
     help = 'Cria a tabela CMVColtaco3 no banco de retenção e garante que a extensão pg_trgm esteja instalada'
