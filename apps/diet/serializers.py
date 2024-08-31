@@ -23,8 +23,20 @@ class DietSerializer(serializers.ModelSerializer):
         macros_planner = MacrosPlanner.objects.get(id=macros_planner_id)
         diet = Diet.objects.create(macros_planner=macros_planner, **validated_data)
 
+        # Define refeições padrão
+        default_meals = [
+            {"name": "Breakfast", "time": "07:00:00", "type_of_meal": "Ordinary"},
+            {"name": "Lunch", "time": "12:00:00", "type_of_meal": "Ordinary"},
+            {"name": "Snack", "time": "15:00:00", "type_of_meal": "Ordinary"},
+            {"name": "Dinner", "time": "19:00:00", "type_of_meal": "Ordinary"},
+        ]
+
         context = self.context
         context['diet_id'] = diet.id
+
+        # Adiciona as refeições padrão se não forem fornecidas refeições
+        if not meals_data:
+            meals_data = default_meals
 
         for meal_data in meals_data:
             meal_serializer = MealSerializer(data=meal_data, context=context)
@@ -46,25 +58,12 @@ class DietSerializer(serializers.ModelSerializer):
                 meal_serializer = MealSerializer(meal, data=meal_data, partial=True, context=self.context)
                 if meal_serializer.is_valid():
                     meal_serializer.save()
-                    food_options_data = meal_data.get('food_options', [])
-                    for food_option_data in food_options_data:
-                        food_option_id = food_option_data.get('id')
-                        if food_option_id:
-                            food_option = FoodOptions.objects.get(id=food_option_id, meal=meal)
-                            for key, value in food_option_data.items():
-                                setattr(food_option, key, value)
-                            food_option.save()
-                        else:
-                            FoodOptions.objects.create(meal=meal, **food_option_data)
                 else:
                     raise serializers.ValidationError(meal_serializer.errors)
             else:
                 meal_serializer = MealSerializer(data=meal_data, context=self.context)
                 if meal_serializer.is_valid():
-                    meal = meal_serializer.save(diet=instance)
-                    food_options_data = meal_data.get('food_options', [])
-                    for food_option_data in food_options_data:
-                        FoodOptions.objects.create(meal=meal, **food_option_data)
+                    meal_serializer.save(diet=instance)
                 else:
                     raise serializers.ValidationError(meal_serializer.errors)
 
