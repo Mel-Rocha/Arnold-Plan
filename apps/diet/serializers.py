@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from apps.meal.models import Meal
 from apps.diet.models import Diet
+from apps.user.models import Nutritionist
 from apps.meal.serializers import MealSerializer
 
 
@@ -11,9 +12,19 @@ class DietSerializer(serializers.ModelSerializer):
     class Meta:
         model = Diet
         fields = '__all__'
+        extra_kwargs = {
+            'nutritionist': {'read_only': True},
+        }
 
     def create(self, validated_data):
-        diet = Diet.objects.create(**validated_data)
+        user = self.context['request'].user
+
+        try:
+            nutritionist = Nutritionist.objects.get(user=user)
+        except Nutritionist.DoesNotExist:
+            raise serializers.ValidationError({'nutritionist': 'Nutritionist with the current user does not exist.'})
+
+        diet = Diet.objects.create(nutritionist=nutritionist, **validated_data)
 
         # Definindo as refeições padrão
         default_meals = [
