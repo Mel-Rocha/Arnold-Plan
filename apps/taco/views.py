@@ -40,7 +40,6 @@ class CMVColtaco3ListView(APIView):
 
 
 class CMVColtaco3DetailView(APIView):
-
     @staticmethod
     def get(request, param, amount):
         try:
@@ -50,7 +49,7 @@ class CMVColtaco3DetailView(APIView):
                 return Response({"detail": "O parâmetro 'amount' deve ser um número válido."}, status=status.HTTP_400_BAD_REQUEST)
 
             if param.isdigit():  # Se o parâmetro for um ID
-                query = "SELECT * FROM CMVColtaco3 WHERE id = %s LIMIT 1"
+                query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
                 params = [param]
             else:  # Se o parâmetro for uma descrição
                 query = """
@@ -62,31 +61,32 @@ class CMVColtaco3DetailView(APIView):
                 """
                 params = [f'%{param}%', param]
 
-            # Executando a query no banco de retenção
             with get_retention_db_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute(query, params)
-                    row = cursor.fetchone()
+                    rows = cursor.fetchall()
 
-                    if row:
-                        # Captura a descrição das colunas
-                        columns = [col[0] for col in cursor.description]
-                        food = dict(zip(columns, row))
-
-                        # Ajustando valores com base no 'amount'
-                        for key in food:
-                            if key not in ['id', 'food_description', 'category']:
-                                try:
-                                    value = float(food[key])
-                                    food[key] = round((value * amount) / 100, 3)
-                                except ValueError:
-                                    continue
-
-                        # Serializando o dado
-                        serializer = CMVColtaco3Serializer(food)
-                        return Response(serializer.data, status=status.HTTP_200_OK)
-                    else:
+                    if not rows:
                         return Response({"detail": "Alimento não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+                    # Captura a descrição das colunas
+                    columns = [col[0] for col in cursor.description]
+                    row = rows[0]  # Seleciona a primeira linha retornada
+
+                    food = dict(zip(columns, row))
+
+                    # Ajustando valores com base no 'amount'
+                    for key in food:
+                        if key not in ['id', 'food_description', 'category']:
+                            try:
+                                value = float(food[key])
+                                food[key] = round((value * amount) / 100, 3)
+                            except ValueError:
+                                continue
+
+                    # Serializando o dado
+                    serializer = CMVColtaco3Serializer(food)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
