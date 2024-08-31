@@ -123,27 +123,28 @@ class CMVColtaco3BulkDetailView(APIView):
     @staticmethod
     def get(request, food_list):
         try:
-            # Converte a string da URL para uma lista de tuplas
+            # Converte a string da URL para uma lista de dicionários
             try:
                 food_list = ast.literal_eval(food_list)
             except (ValueError, SyntaxError):
-                return Response({"detail": "O parâmetro 'food_list' deve ser uma lista de tuplas válida."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "O parâmetro 'food_list' deve ser uma lista de dicionários válida."}, status=status.HTTP_400_BAD_REQUEST)
 
             if not isinstance(food_list, list):
-                return Response({"detail": "O parâmetro 'food_list' deve ser uma lista de tuplas."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "O parâmetro 'food_list' deve ser uma lista de dicionários."}, status=status.HTTP_400_BAD_REQUEST)
 
             results = []
 
             for item in food_list:
-                if not isinstance(item, tuple) or len(item) != 2:
-                    return Response({"detail": "Cada item na lista deve ser uma tupla contendo o ID do alimento e a quantidade."}, status=status.HTTP_400_BAD_REQUEST)
+                if not isinstance(item, dict) or 'id_food' not in item or 'quantity' not in item:
+                    return Response({"detail": "Cada item na lista deve ser um dicionário contendo as chaves 'id_food' e 'quantity'."}, status=status.HTTP_400_BAD_REQUEST)
 
-                food_id, amount = item
+                food_id = item['id_food']
+                amount = item['quantity']
 
                 try:
                     amount = float(amount)
                 except ValueError:
-                    return Response({"detail": f"O parâmetro 'amount' para o alimento com ID {food_id} deve ser um número válido."}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"detail": f"O parâmetro 'quantity' para o alimento com ID {food_id} deve ser um número válido."}, status=status.HTTP_400_BAD_REQUEST)
 
                 query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
                 params = [food_id]
