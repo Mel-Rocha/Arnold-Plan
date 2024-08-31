@@ -18,32 +18,21 @@ class DietSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        meals_data = validated_data.pop('meals', [])
         macros_planner_id = self.context['macros_planner_id']
         macros_planner = MacrosPlanner.objects.get(id=macros_planner_id)
         diet = Diet.objects.create(macros_planner=macros_planner, **validated_data)
 
-        # Define refeições padrão
+        # Definindo as refeições padrão
         default_meals = [
-            {"name": "Breakfast", "time": "07:00:00", "type_of_meal": "Ordinary"},
-            {"name": "Lunch", "time": "12:00:00", "type_of_meal": "Ordinary"},
-            {"name": "Snack", "time": "15:00:00", "type_of_meal": "Ordinary"},
-            {"name": "Dinner", "time": "19:00:00", "type_of_meal": "Ordinary"},
+            {"name": "Breakfast", "time": "07:00:00", "type_of_meal": "Ordinary", "is_active": True},
+            {"name": "Lunch", "time": "12:00:00", "type_of_meal": "Ordinary", "is_active": True},
+            {"name": "Snack", "time": "16:00:00", "type_of_meal": "Ordinary", "is_active": True},
+            {"name": "Dinner", "time": "19:00:00", "type_of_meal": "Ordinary", "is_active": True}
         ]
 
-        context = self.context
-        context['diet_id'] = diet.id
-
-        # Adiciona as refeições padrão se não forem fornecidas refeições
-        if not meals_data:
-            meals_data = default_meals
-
-        for meal_data in meals_data:
-            meal_serializer = MealSerializer(data=meal_data, context=context)
-            if meal_serializer.is_valid():
-                meal_serializer.save()
-            else:
-                raise serializers.ValidationError(meal_serializer.errors)
+        # Criando as refeições padrão
+        for meal_data in default_meals:
+            Meal.objects.create(diet=diet, **meal_data)
 
         return diet
 
