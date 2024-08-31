@@ -1,31 +1,63 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from apps.core.models import Core
+from apps.meal.models import Meal
 from apps.user.models import Athlete
 
 
+class MealStatus(models.TextChoices):
+    DONE = 'done', 'Done'
+    PARTIALLY_DONE = 'partially_done', 'Partially Done'
+    NOT_DONE = 'not_done', 'Not Done'
+
+
+class FeelingStatus(models.TextChoices):
+    HAPPY = 'happy', 'Happy'
+    QUIET = 'quiet', 'Quiet'
+    NORMAL = 'normal', 'Normal'
+    SAD = 'sad', 'Sad'
+    ANGER = 'anger', 'Anger'
+    ANXIETY = 'anxiety', 'Anxiety'
+
+
+class AppetiteStatus(models.TextChoices):
+    HUNGER = 'hunger', 'Hunger'
+    DESIRE_TO_EAT = 'desire_to_eat', 'Desire to Eat'
+    SATISFIED = 'satisfied', 'Satisfied'
+    STEW = 'stew', 'Stew'
+
+
 class DailyRecords(Core):
-    TIME_CHOICES = [
-        ('morning', 'Morning'),
-        ('afternoon', 'Afternoon'),
-        ('evening', 'Evening'),
-    ]
-
-    athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE, default=None)
-
+    athlete = models.ForeignKey(Athlete, related_name='Athlete', on_delete=models.CASCADE)
+    meal = models.OneToOneField(Meal, related_name='daily_record', on_delete=models.CASCADE)
     date = models.DateField()
 
-    morning_meal = models.BooleanField(default=False)
-    afternoon_meal = models.BooleanField(default=False)
-    evening_meal = models.BooleanField(default=False)
+    # Usando TextChoices para os enums
+    meal_status = models.CharField(
+        max_length=20,
+        choices=MealStatus.choices,
+    )
+    feeling_status = models.CharField(
+        max_length=10,
+        choices=FeelingStatus.choices,
+        blank=True,
+    )
+    appetite_status = models.CharField(
+        max_length=15,
+        choices=AppetiteStatus.choices,
+        blank=True,
+    )
+    food_replacement = models.TextField(blank=True, null=True)
+    observations = models.TextField(blank=True, null=True)
 
-    bowel_movements = models.IntegerField(default=0)
-
-    hunger_times = models.CharField(max_length=10, choices=TIME_CHOICES, blank=True)
-    stress_times = models.CharField(max_length=10, choices=TIME_CHOICES, blank=True)
-    anxiety_times = models.CharField(max_length=10, choices=TIME_CHOICES, blank=True)
-    craving_times = models.CharField(max_length=10, choices=TIME_CHOICES, blank=True)
-
+    def save(self, *args, **kwargs):
+        # Validação para garantir que food_replacement seja obrigatório em casos de "Partially Done" ou "Not Done"
+        if self.status in [MealStatus.PARTIALLY_DONE, MealStatus.NOT_DONE] and not self.food_replacement:
+            raise ValidationError("Food replacement is required for 'Partially Done' or 'Not Done' status.")
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Daily Record #{self.id}"
+        return f"Daily Record #{self.id} for {self.athlete} on {self.date}"
+
+
