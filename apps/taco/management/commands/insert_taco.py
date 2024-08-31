@@ -2,6 +2,7 @@ import os
 import xlrd
 from django.core.management.base import BaseCommand
 from apps.taco.utils import get_retention_db_connection
+import re
 
 class Command(BaseCommand):
     help = 'Imports specific data from the fixed XLS file into the CMVColtaco3 table'
@@ -36,6 +37,10 @@ class Command(BaseCommand):
                         "Valores correspondentes à somatória do resultado analítico do retinol mais o valor calculado com base no teor de carotenóides segundo o livro Fontes brasileiras de carotenóides: tabela brasileira de composição de carotenóides em alimentos.",
                         "Valores retirados do livro Fontes brasileiras de carotenóides: tabela brasileira de composição de carotenóides em alimentos."
                     ]
+
+                    # Function to remove punctuation
+                    def clean_description(description):
+                        return re.sub(r'[^\w\s]', '', description).strip()
 
                     # Iterate over the rows in the sheet
                     for row_idx in range(sheet.nrows):
@@ -72,6 +77,9 @@ class Command(BaseCommand):
                         if not description.strip():
                             continue
 
+                        # Clean the description
+                        cleaned_description = clean_description(description)
+
                         def format_value(value):
                             try:
                                 return f"{float(value):.3f}" if value else '0.000'
@@ -97,7 +105,7 @@ class Command(BaseCommand):
                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                             """,
                             (
-                                description,
+                                cleaned_description,
                                 moisture,
                                 energy_kcal,
                                 energy_kj,
