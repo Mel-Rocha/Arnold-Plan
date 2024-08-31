@@ -16,6 +16,7 @@ class Meal(Core):
     name = models.CharField(max_length=100)
     time = models.TimeField(default='00:00:00')
     type_of_meal = models.CharField(max_length=50, choices=TypeOfMeal.choices, default=TypeOfMeal.ORDINARY)
+    foods = models.JSONField(default=list)
 
     def __str__(self):
         return f"Meal #{self.id}"
