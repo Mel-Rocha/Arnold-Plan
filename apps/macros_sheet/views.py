@@ -1,26 +1,37 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 
-from apps.core.permissions import IsNutritionistUser
 from apps.macros_sheet.models import MacrosSheet
 from apps.macros_sheet.serializers import MacrosSheetSerializer
-from config.urls import swagger_safe
+from apps.diet.models import Diet
+
+class MacrosSheetListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, diet_id, format=None):
+        diet = get_object_or_404(Diet, id=diet_id)
+        macros_sheets = MacrosSheet.objects.filter(diet=diet)
+        serializer = MacrosSheetSerializer(macros_sheets, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class MacrosSheetDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, diet_id, macros_sheet_id, format=None):
+        macros_sheet = get_object_or_404(MacrosSheet, id=macros_sheet_id, diet_id=diet_id)
+        serializer = MacrosSheetSerializer(macros_sheet)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, diet_id, macros_sheet_id, format=None):
+        macros_sheet = get_object_or_404(MacrosSheet, id=macros_sheet_id, diet_id=diet_id)
+        serializer = MacrosSheetSerializer(macros_sheet, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MacrosSheetViewSet(viewsets.ModelViewSet):
-    serializer_class = MacrosSheetSerializer
-
-    @swagger_safe(MacrosSheet)
-    def get_queryset(self):
-        macros_planner_id = self.kwargs.get('macros_planner_id')
-        return MacrosSheet.objects.filter(macros_planner_id=macros_planner_id)
-
-    def perform_create(self, serializer):
-        macros_planner_id = self.kwargs.get('macros_planner_id')
-        serializer.context['macros_planner_id'] = macros_planner_id
-        serializer.save()
-
-    def get_permissions(self):
-        if self.request.method in SAFE_METHODS:
-            return [IsAuthenticated()]
-        return [IsAuthenticated(), IsNutritionistUser()]
