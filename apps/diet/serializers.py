@@ -93,10 +93,6 @@ class DietSerializer(serializers.ModelSerializer):
                 else:
                     raise serializers.ValidationError(meal_serializer.errors)
             else:
-                meal_serializer = MealSerializer(data=meal_data, context=self.context)
-                if meal_serializer.is_valid():
-                    meal_serializer.save(diet=instance)
-                else:
-                    raise serializers.ValidationError(meal_serializer.errors)
+                Meal.objects.create(diet=instance, **meal_data)
 
         return instance
