@@ -1,21 +1,32 @@
+from datetime import timedelta
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
-from apps.meal.models import Meal
 from apps.diet.models import Diet
-from apps.user.models import Nutritionist
-from apps.meal.serializers import MealSerializer
 from apps.macros_sheet.models import MacrosSheet
+from apps.meal.models import Meal
+from apps.meal.serializers import MealSerializer
+from apps.user.models import Nutritionist
 
 
 class DietSerializer(serializers.ModelSerializer):
     meals = MealSerializer(many=True, required=False)
+    weeks = serializers.SerializerMethodField()
 
     class Meta:
         model = Diet
         fields = '__all__'
         extra_kwargs = {
             'nutritionist': {'read_only': True},
+            'weeks': {'read_only': True},  # Campo somente leitura
         }
+
+    def get_weeks(self, obj):
+        # Calcula o número de semanas com base nas datas inicial e final
+        if obj.initial_date and obj.final_date:
+            delta = obj.final_date - obj.initial_date
+            return (delta.days // 7) + 1
+        return 1  # Retorna 1 semana por padrão se não houver datas
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -41,7 +52,7 @@ class DietSerializer(serializers.ModelSerializer):
             Meal.objects.create(diet=diet, **meal_data)
 
         # Criação das MacrosSheets baseadas nas semanas
-        weeks = validated_data.get('weeks', 0)
+        weeks = self.get_weeks(diet)
         for week in range(1, weeks + 1):
             MacrosSheet.objects.create(diet=diet, week=week)
 
@@ -69,7 +80,7 @@ class DietSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(meal_serializer.errors)
 
         # Atualizando o número de MacrosSheets
-        weeks = validated_data.get('weeks', 0)
+        weeks = self.get_weeks(instance)
         current_weeks = instance.macros_sheets.count()
 
         if weeks > current_weeks:
