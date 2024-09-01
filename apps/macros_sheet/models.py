@@ -1,7 +1,6 @@
 import logging
 
 from django.db import models
-from django.core.validators import MinValueValidator
 
 from apps.core.models import Core
 from apps.diet.models import Diet
@@ -54,3 +53,47 @@ class MealMacrosSheet(Core):
 
 
 
+class DietMacrosSheet(Core):
+    diet = models.OneToOneField(Diet, related_name='macros_sheet', on_delete=models.CASCADE)
+
+    @property
+    def cho(self):
+        """Calcula o total de carboidratos (CHO) da dieta somando os valores de MealMacrosSheet."""
+        meals = MealMacrosSheet.objects.filter(meal__diet=self.diet)
+        return sum(meal.cho for meal in meals)
+
+    @property
+    def ptn(self):
+        """Calcula o total de proteínas (PTN) da dieta somando os valores de MealMacrosSheet."""
+        meals = MealMacrosSheet.objects.filter(meal__diet=self.diet)
+        return sum(meal.ptn for meal in meals)
+
+    @property
+    def fat(self):
+        """Calcula o total de gorduras (FAT) da dieta somando os valores de MealMacrosSheet."""
+        meals = MealMacrosSheet.objects.filter(meal__diet=self.diet)
+        return sum(meal.fat for meal in meals)
+
+    @property
+    def kcal(self):
+        """Calcula o total de calorias (KCAL) da dieta somando os valores de MealMacrosSheet."""
+        meals = MealMacrosSheet.objects.filter(meal__diet=self.diet)
+        return sum(meal.kcal for meal in meals)
+
+    @property
+    def cho_proportion(self):
+        """Calcula a proporção de carboidratos (CHO) em relação ao peso do atleta da dieta."""
+        proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
+        return round(proportions.cho_proportion, 2)
+
+    @property
+    def ptn_proportion(self):
+        """Calcula a proporção de proteínas (PTN) em relação ao peso do atleta da dieta."""
+        proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
+        return round(proportions.ptn_proportion, 2)
+
+    @property
+    def fat_proportion(self):
+        """Calcula a proporção de gorduras (FAT) em relação ao peso do atleta da dieta."""
+        proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
+        return round(proportions.fat_proportion, 2)

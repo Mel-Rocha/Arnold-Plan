@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from apps.macros_sheet.models import MealMacrosSheet
+from apps.macros_sheet.models import MealMacrosSheet, DietMacrosSheet
+
 
 class MealMacrosSheetSerializer(serializers.ModelSerializer):
     cho = serializers.ReadOnlyField()
@@ -13,3 +14,10 @@ class MealMacrosSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = MealMacrosSheet
         fields = ['id', 'meal', 'cho', 'ptn', 'fat', 'kcal', 'cho_proportion', 'ptn_proportion', 'fat_proportion']
+
+
+class DietMacrosSheetSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DietMacrosSheet
+        fields = ['id', 'diet', 'cho', 'ptn', 'fat', 'kcal', 'cho_proportion', 'ptn_proportion', 'fat_proportion']

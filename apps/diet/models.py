@@ -2,6 +2,8 @@ from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from apps.core.models import Core
 from apps.user.models import Athlete, Nutritionist
@@ -40,3 +42,11 @@ class Diet(Core):
                 raise ValidationError(f"Initial date cannot be after the earliest daily record date: {earliest_record}")
             if self.final_date < latest_record:
                 raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
+
+
+@receiver(post_save, sender=Diet)
+def create_diet_macros_sheet(sender, instance, created, **kwargs):
+    if created:
+        DietMacrosSheet = apps.get_model('macros_sheet', 'DietMacrosSheet')
+        DietMacrosSheet.objects.create(diet=instance)
+        print(f"DietMacrosSheet created for Meal #{instance.id}")
