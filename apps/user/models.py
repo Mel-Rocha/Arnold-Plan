@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 
 from apps.core.models import Core
+from apps.core.validators import validate_not_in_future
 
 
 # User Abstract base class
@@ -57,7 +58,7 @@ class Athlete(Profile):
     category = models.CharField(max_length=50, choices=Category.choices)
     weight = models.FloatField(default=1, validators=[MinValueValidator(1)])
     height = models.FloatField(default=1, validators=[MinValueValidator(1)])
-    birth_date = models.DateField()
+    birth_date = models.DateField(validators=[validate_not_in_future])
     is_pro = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):

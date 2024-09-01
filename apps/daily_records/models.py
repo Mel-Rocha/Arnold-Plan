@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from apps.core.models import Core
+from apps.core.validators import validate_not_in_future
 from apps.meal.models import Meal
 from apps.user.models import Athlete
 
@@ -31,7 +32,7 @@ class AppetiteStatus(models.TextChoices):
 class DailyRecords(Core):
     athlete = models.ForeignKey(Athlete, related_name='Athlete', on_delete=models.CASCADE)
     meal = models.ForeignKey(Meal, related_name='daily_records', on_delete=models.PROTECT)
-    date = models.DateField()
+    date = models.DateField(validators=[validate_not_in_future])
 
     # Usando TextChoices para os enums
     meal_status = models.CharField(
