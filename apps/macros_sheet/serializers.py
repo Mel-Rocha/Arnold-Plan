@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
 from apps.diet.models import Diet
-from apps.macros_sheet.models import MacrosSheet
+from apps.macros_sheet.models import MealMacrosSheet
 
 
-class MacrosSheetSerializer(serializers.ModelSerializer):
+class MealMacrosSheetSerializer(serializers.ModelSerializer):
     kcal = serializers.ReadOnlyField()
     kcal_level = serializers.ReadOnlyField()
     cho_level = serializers.ReadOnlyField()
@@ -15,7 +15,7 @@ class MacrosSheetSerializer(serializers.ModelSerializer):
     fat_proportion = serializers.ReadOnlyField()
 
     class Meta:
-        model = MacrosSheet
+        model = MealMacrosSheet
         fields = ['diet', 'cho', 'ptn', 'fat', 'kcal', 'kcal_level', 'cho_level', 'ptn_level',
                   'fat_level', 'cho_proportion', 'ptn_proportion', 'fat_proportion']
         extra_kwargs = {'diet': {'read_only': True}}
@@ -26,7 +26,7 @@ class MacrosSheetSerializer(serializers.ModelSerializer):
 
         validated_data.pop('diet', None)
 
-        return MacrosSheet.objects.create(diet=diet, **validated_data)
+        return MealMacrosSheet.objects.create(diet=diet, **validated_data)
 
     def to_representation(self, instance):
         """

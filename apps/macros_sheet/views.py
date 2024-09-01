@@ -3,13 +3,13 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import MethodNotAllowed
 
-from apps.macros_sheet.models import MacrosSheet
-from apps.macros_sheet.serializers import MacrosSheetSerializer
+from apps.macros_sheet.models import MealMacrosSheet
+from apps.macros_sheet.serializers import MealMacrosSheetSerializer
 
 
-class MacrosSheetViewSet(viewsets.ModelViewSet):
-    queryset = MacrosSheet.objects.all()
-    serializer_class = MacrosSheetSerializer
+class MealMacrosSheetViewSet(viewsets.ModelViewSet):
+    queryset = MealMacrosSheet.objects.all()
+    serializer_class = MealMacrosSheetSerializer
     permission_classes = [IsAuthenticated]
 
     # Permitir apenas GET e PATCH

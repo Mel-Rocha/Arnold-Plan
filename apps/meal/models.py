@@ -1,4 +1,7 @@
+from django.apps import apps
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from apps.core.models import Core
 from apps.diet.models import Diet
@@ -20,3 +23,11 @@ class Meal(Core):
 
     def __str__(self):
         return f"Meal #{self.id}"
+
+
+@receiver(post_save, sender=Meal)
+def create_meal_macros_sheet(sender, instance, created, **kwargs):
+    if created:
+        MealMacrosSheet = apps.get_model('macros_sheet', 'MealMacrosSheet')
+        MealMacrosSheet.objects.create(meal=instance)
+        print(f"MealMacrosSheet created for Meal #{instance.id}")
