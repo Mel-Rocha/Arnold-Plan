@@ -30,7 +30,7 @@ class AppetiteStatus(models.TextChoices):
 
 class DailyRecords(Core):
     athlete = models.ForeignKey(Athlete, related_name='Athlete', on_delete=models.CASCADE)
-    meal = models.ForeignKey(Meal, related_name='daily_records', on_delete=models.CASCADE)
+    meal = models.ForeignKey(Meal, related_name='daily_records', on_delete=models.PROTECT)
     date = models.DateField()
 
     # Usando TextChoices para os enums
