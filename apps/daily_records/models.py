@@ -53,7 +53,7 @@ class DailyRecords(Core):
 
     def save(self, *args, **kwargs):
         # Validação para garantir que food_replacement seja obrigatório em casos de "Partially Done" ou "Not Done"
-        if self.status in [MealStatus.PARTIALLY_DONE, MealStatus.NOT_DONE] and not self.food_replacement:
+        if self.meal_status in [MealStatus.PARTIALLY_DONE, MealStatus.NOT_DONE] and not self.food_replacement:
             raise ValidationError("Food replacement is required for 'Partially Done' or 'Not Done' status.")
         super().save(*args, **kwargs)
 

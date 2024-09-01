@@ -1,12 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
-
-from apps.user.models import Nutritionist
-from apps.core.permissions import IsAthleteUser
 from apps.daily_records.models import DailyRecords
 from apps.daily_records.serializers import DailyRecordsSerializer
+from apps.user.models import Nutritionist
+from apps.core.permissions import IsAthleteUser
 from config.urls import swagger_safe
-
 
 class DailyRecordsViewSet(viewsets.ModelViewSet):
     serializer_class = DailyRecordsSerializer
@@ -18,7 +16,6 @@ class DailyRecordsViewSet(viewsets.ModelViewSet):
         if user.is_nutritionist:
             try:
                 nutritionist = Nutritionist.objects.get(user=user)
-                print(f"Nutritionist instance: {nutritionist}")
                 return DailyRecords.objects.filter(athlete__nutritionist=nutritionist)
             except Nutritionist.DoesNotExist:
                 return DailyRecords.objects.none()
