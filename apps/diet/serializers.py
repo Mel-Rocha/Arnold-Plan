@@ -1,10 +1,8 @@
-from datetime import timedelta
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
 from apps.daily_records.models import DailyRecords
 from apps.diet.models import Diet
-from apps.macros_sheet.models import MacrosSheet
 from apps.meal.models import Meal
 from apps.meal.serializers import MealSerializer
 from apps.user.models import Nutritionist, Athlete
@@ -82,10 +80,6 @@ class DietSerializer(serializers.ModelSerializer):
         for meal_data in default_meals:
             Meal.objects.create(diet=diet, **meal_data)
 
-        weeks = self.get_weeks(diet)
-        for week in range(1, weeks + 1):
-            MacrosSheet.objects.create(diet=diet, week=week)
-
         return diet
 
     def update(self, instance, validated_data):
@@ -107,16 +101,5 @@ class DietSerializer(serializers.ModelSerializer):
                     meal_serializer.save(diet=instance)
                 else:
                     raise serializers.ValidationError(meal_serializer.errors)
-
-        weeks = self.get_weeks(instance)
-        current_weeks = instance.macros_sheets.count()
-
-        if weeks > current_weeks:
-            for week in range(current_weeks + 1, weeks + 1):
-                MacrosSheet.objects.create(diet=instance, week=week)
-        elif weeks < current_weeks:
-            excess_weeks = instance.macros_sheets.filter(week__gt=weeks)
-            for macros_sheet in excess_weeks:
-                macros_sheet.delete()
 
         return instance

@@ -16,9 +16,9 @@ class MacrosSheetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MacrosSheet
-        fields = ['diet', 'week', 'cho', 'ptn', 'fat', 'kcal', 'kcal_level', 'cho_level', 'ptn_level',
+        fields = ['diet', 'cho', 'ptn', 'fat', 'kcal', 'kcal_level', 'cho_level', 'ptn_level',
                   'fat_level', 'cho_proportion', 'ptn_proportion', 'fat_proportion']
-        extra_kwargs = {'diet': {'read_only': True}, 'week': {'required': False}}
+        extra_kwargs = {'diet': {'read_only': True}}
 
     def create(self, validated_data):
         diet_id = self.context.get('diet_id')

@@ -1,8 +1,6 @@
 import logging
 
 from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import pre_delete
 from django.core.validators import MinValueValidator
 
 from apps.core.models import Core
@@ -15,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 class MacrosSheet(Core):
     diet = models.ForeignKey(Diet, related_name='macros_sheets', on_delete=models.CASCADE)
-    week = models.PositiveIntegerField(default=0)
     cho = models.FloatField(default=1, validators=[MinValueValidator(1)])
     ptn = models.FloatField(default=1, validators=[MinValueValidator(1)])
     fat = models.FloatField(default=1, validators=[MinValueValidator(1)])
@@ -61,26 +58,7 @@ class MacrosSheet(Core):
         return round(proportions.fat_proportion, 2)
 
 
-    def update_week_based_on_id(self):
-        if self.week == 0 and self.diet:
-            macros_sheets = self.diet.macros_sheets.all().order_by('id')
-
-            for index, macros_sheet in enumerate(macros_sheets):
-                macros_sheet.week = index + 1
-                macros_sheet.save()
-
-            new_week = macros_sheets.last().week + 1 if macros_sheets.exists() else 1
-            self.week = new_week
-            self.diet.save()
-
-
     def save(self, *args, **kwargs):
         self.kcal = KcalLevel.calculate_kcal(self.cho, self.ptn, self.fat)
         super().save(*args, **kwargs)
-        self.update_week_based_on_id()
 
-
-@receiver(pre_delete, sender=MacrosSheet)
-def pre_delete_macros_sheet(sender, instance, **kwargs):
-    logger.info(f"Signal received for MacrosSheet {instance.id} deletion.")
-    instance.update_week_based_on_id()
