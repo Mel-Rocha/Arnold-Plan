@@ -1,11 +1,12 @@
 import logging
 from rest_framework import serializers
+
 from apps.daily_records.models import DailyRecords
-from apps.meal.models import Meal
-from apps.diet.models import Diet
 from apps.user.models import Athlete
 
+
 logger = logging.getLogger(__name__)
+
 
 class DailyRecordsSerializer(serializers.ModelSerializer):
     class Meta:
