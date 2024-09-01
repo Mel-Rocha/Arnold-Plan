@@ -52,7 +52,8 @@ class CalcMacroLevel:
         else:
             return Level.is_high.name
 
-    def calculate_macro_level(self, amount, kcal, macro_type):
+    @staticmethod
+    def calculate_macro_level(amount, kcal, macro_type):
         thresholds = {
             'cho': (4, 55, 75),
             'fat': (9, 15, 30),
@@ -63,7 +64,7 @@ class CalcMacroLevel:
             raise ValueError(f"Invalid macro_type: {macro_type}")
 
         kcal_per_unit, low_threshold, high_threshold = thresholds[macro_type]
-        return self.calculate_level(amount, kcal, kcal_per_unit, low_threshold, high_threshold)
+        return CalcMacroLevel.calculate_level(amount, kcal, kcal_per_unit, low_threshold, high_threshold)
 
 
 class ProportionGKG:

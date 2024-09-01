@@ -51,6 +51,25 @@ class MealMacrosSheet(Core):
         proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
         return round(proportions.fat_proportion, 2)
 
+    @property
+    def cho_level(self):
+        """Calcula o nível de carboidratos (CHO) da refeição."""
+        return CalcMacroLevel.calculate_macro_level(self.cho, self.kcal, 'cho')
+
+    @property
+    def ptn_level(self):
+        """Calcula o nível de proteínas (PTN) da refeição."""
+        return CalcMacroLevel.calculate_macro_level(self.ptn, self.kcal, 'ptn')
+
+    @property
+    def fat_level(self):
+        """Calcula o nível de gorduras (FAT) da refeição."""
+        return CalcMacroLevel.calculate_macro_level(self.fat, self.kcal, 'fat')
+
+    @property
+    def kcal_level(self):
+        """Calcula o nível de calorias (KCAL) da refeição."""
+        return KcalLevel.calculate_kcal_level(self.kcal)
 
 
 class DietMacrosSheet(Core):
