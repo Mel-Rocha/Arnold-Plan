@@ -4,8 +4,9 @@ from django.db import models
 
 from apps.core.models import Core
 from apps.diet.models import Diet
-from apps.macros_sheet.calcs import KcalLevel, CalcMacroLevel, ProportionGKG
 from apps.meal.models import Meal
+from apps.macros_sheet.calcs import KcalLevel, CalcMacroLevel, ProportionGKG
+
 
 logger = logging.getLogger(__name__)
 
@@ -116,3 +117,23 @@ class DietMacrosSheet(Core):
         """Calcula a proporção de gorduras (FAT) em relação ao peso do atleta da dieta."""
         proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
         return round(proportions.fat_proportion, 2)
+
+    @property
+    def cho_level(self):
+        """Calcula o nível de carboidratos (CHO) da dieta."""
+        return CalcMacroLevel.calculate_macro_level(self.cho, self.kcal, 'cho')
+
+    @property
+    def ptn_level(self):
+        """Calcula o nível de proteínas (PTN) da dieta."""
+        return CalcMacroLevel.calculate_macro_level(self.ptn, self.kcal, 'ptn')
+
+    @property
+    def fat_level(self):
+        """Calcula o nível de gorduras (FAT) da dieta."""
+        return CalcMacroLevel.calculate_macro_level(self.fat, self.kcal, 'fat')
+
+    @property
+    def kcal_level(self):
+        """Calcula o nível de calorias (KCAL) da dieta."""
+        return KcalLevel.calculate_kcal_level(self.kcal)
