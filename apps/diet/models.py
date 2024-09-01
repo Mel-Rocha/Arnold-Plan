@@ -1,3 +1,5 @@
+from django.apps import apps
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.validators import MinValueValidator
 
@@ -9,6 +11,7 @@ class TypeOfDiet(models.TextChoices):
     MAINTENANCE = 'Maintenance', 'Maintenance'
     BULKING = 'Bulking', 'Bulking'
     CUTTING = 'Cutting', 'Cutting'
+
 
 
 class Diet(Core):
@@ -24,3 +27,16 @@ class Diet(Core):
 
     def __str__(self):
         return f"Diet #{self.id}"
+
+    def clean(self):
+        super().clean()
+        DailyRecords = apps.get_model('daily_records', 'DailyRecords')
+        daily_records = DailyRecords.objects.filter(athlete=self.athlete)
+        if daily_records.exists():
+            earliest_record = daily_records.order_by('date').first().date
+            latest_record = daily_records.order_by('date').last().date
+
+            if self.initial_date > earliest_record:
+                raise ValidationError(f"Initial date cannot be after the earliest daily record date: {earliest_record}")
+            if self.final_date < latest_record:
+                raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
