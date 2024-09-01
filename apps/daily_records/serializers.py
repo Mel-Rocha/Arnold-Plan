@@ -19,26 +19,19 @@ class DailyRecordsSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        # Obtendo o atleta do contexto
         user = self.context['request'].user
         logger.debug(f"User: {user}")
         athlete = Athlete.objects.get(user=user)
         logger.debug(f"Athlete: {athlete}")
 
-        # Verificando se a data está dentro do intervalo de alguma dieta
         date = validated_data['date']
-        logger.debug(f"Date: {date}")
-        diets = Diet.objects.filter(athlete=athlete, initial_date__lte=date, final_date__gte=date)
-        logger.debug(f"Diets: {diets}")
+        meal = validated_data['meal']
+        logger.debug(f"Date: {date}, Meal: {meal}")
 
-        for diet in diets:
-            logger.debug(f"Diet ID: {diet.id}, Initial Date: {diet.initial_date}, Final Date: {diet.final_date}")
+        if DailyRecords.objects.filter(athlete=athlete, meal=meal, date=date).exists():
+            logger.error("A DailyRecord for this meal and date already exists.")
+            raise serializers.ValidationError("A DailyRecord for this meal and date already exists.")
 
-        if not diets.exists():
-            logger.error("No active diet found for the given date.")
-            raise serializers.ValidationError("No active diet found for the given date.")
-
-        # Criando um único registro de refeição
         daily_record_data = validated_data.copy()
         daily_record_data['athlete'] = athlete
         daily_record = DailyRecords.objects.create(**daily_record_data)
