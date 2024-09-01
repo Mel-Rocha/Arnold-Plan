@@ -40,14 +40,13 @@ class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, Retriev
 
     def perform_create(self, serializer):
         user = self.request.user
-        related_model_id = self.request.data.get('athlete')  # Pegando o ID do atleta do corpo da requisição
-        related_model_class = Athlete  # Substitua 'Athlete' pelo modelo que você está validando
+        related_model_id = self.get_related_model_id()  # Método para obter o ID do modelo relacionado
+        related_model_class = self.get_related_model_class()  # Método para obter a classe do modelo relacionado
 
         if not related_model_id:
-            raise PermissionDenied("Athlete must be specified for this operation.")
+            raise PermissionDenied("Related model must be specified for this operation.")
 
         try:
-            # Verifica se o atleta está associado ao nutricionista
             related_model = related_model_class.objects.get(id=related_model_id, nutritionist=user.nutritionist)
         except related_model_class.DoesNotExist:
             raise PermissionDenied("Cannot create object for a related model not associated with this nutritionist.")
@@ -81,3 +80,16 @@ class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, Retriev
                 raise PermissionDenied("Cannot delete objects for athletes not associated with this nutritionist.")
 
         instance.delete()
+
+    def get_related_model_id(self):
+        """
+        Método a ser implementado pelas subclasses para obter o ID do modelo relacionado para a operação de criação.
+        """
+        raise NotImplementedError("Subclasses must implement `get_related_model_id`.")
+
+    def get_related_model_class(self):
+        """
+        Método a ser implementado pelas subclasses para obter a classe do modelo relacionado para a operação de criação.
+        """
+        raise NotImplementedError("Subclasses must implement `get_related_model_class`.")
+
