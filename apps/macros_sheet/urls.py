@@ -1,11 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-
-from apps.macros_sheet.views import MealMacrosSheetViewSet
-
-router = DefaultRouter()
-router.register(r'diets/(?P<diet_id>[0-9a-fA-F\-]+)/macros_sheets', MealMacrosSheetViewSet, basename='meal_macros_sheet')
+from django.urls import path
+from apps.macros_sheet.views import MealMacrosSheetDetailView
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('meal-macros-sheet/<uuid:pk>/', MealMacrosSheetDetailView.as_view(), name='meal_macros_sheet_detail'),
 ]
