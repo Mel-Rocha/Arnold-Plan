@@ -30,19 +30,6 @@ class Diet(Core):
     def __str__(self):
         return f"Diet #{self.id}"
 
-    def clean(self):
-        super().clean()
-        DailyRecords = apps.get_model('daily_records', 'DailyRecords')
-        daily_records = DailyRecords.objects.filter(athlete=self.athlete)
-        if daily_records.exists():
-            earliest_record = daily_records.order_by('date').first().date
-            latest_record = daily_records.order_by('date').last().date
-
-            if self.initial_date > earliest_record:
-                raise ValidationError(f"Initial date cannot be after the earliest daily record date: {earliest_record}")
-            if self.final_date < latest_record:
-                raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
-
 
 @receiver(post_save, sender=Diet)
 def create_diet_macros_sheet(sender, instance, created, **kwargs):

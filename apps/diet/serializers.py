@@ -44,19 +44,16 @@ class DietSerializer(serializers.ModelSerializer):
         if instance:
             initial_date = data.get('initial_date', instance.initial_date)
             final_date = data.get('final_date', instance.final_date)
-        else:
-            initial_date = data.get('initial_date')
-            final_date = data.get('final_date')
+            daily_records = DailyRecords.objects.filter(athlete=athlete)
+            if daily_records.exists():
+                earliest_record = daily_records.order_by('date').first().date
+                latest_record = daily_records.order_by('date').last().date
 
-        daily_records = DailyRecords.objects.filter(athlete=athlete)
-        if daily_records.exists():
-            earliest_record = daily_records.order_by('date').first().date
-            latest_record = daily_records.order_by('date').last().date
-
-            if initial_date > earliest_record:
-                raise ValidationError(f"Initial date cannot be after the earliest daily record date: {earliest_record}")
-            if final_date < latest_record:
-                raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
+                if initial_date > earliest_record:
+                    raise ValidationError(
+                        f"Initial date cannot be after the earliest daily record date: {earliest_record}")
+                if final_date < latest_record:
+                    raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
 
         return data
 
