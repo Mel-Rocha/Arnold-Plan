@@ -3,8 +3,6 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, \
     DestroyModelMixin
 
-from apps.user.models import Athlete
-
 
 class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin,
                                          UpdateModelMixin, DestroyModelMixin):
