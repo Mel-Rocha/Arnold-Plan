@@ -1,12 +1,11 @@
 from rest_framework import viewsets
-from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound, PermissionDenied
 
-from apps.core.permissions import IsNutritionistUser, IsAthleteUser
 from apps.meal.models import Meal
 from apps.diet.models import Diet
-from config.urls import swagger_safe
 from apps.meal.serializers import MealSerializer
+from apps.core.permissions import IsNutritionistUser, IsAthleteUser
 
 
 class MealViewSet(viewsets.ModelViewSet):
