@@ -10,10 +10,10 @@ from rest_framework.decorators import action
 from apps.core import gateway
 from apps.core.gateway import response_log_user
 from apps.user.models import  Nutritionist, Athlete
+from apps.core.permissions import IsNutritionistUser
 from apps.core.permissions import IsNotAthleteUserAndIsNotNutritionist, IsOwnerOrReadOnly
 from apps.user.serializers import MyTokenObtainPairSerializer, UpdatePasswordSerializer, \
     UserSerializerCreateOrUpdate, AthleteSerializer, NutritionistSerializer
-from apps.core.permissions import IsNutritionistUser
 
 
 class MyTokenObtainPairView(TokenObtainPairView):

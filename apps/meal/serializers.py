@@ -7,7 +7,6 @@ from apps.diet.models import Diet
 from apps.taco.utils import get_retention_db_connection
 
 
-# Configurar logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 

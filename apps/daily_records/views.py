@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 from config.urls import swagger_safe
 from apps.user.models import Nutritionist
+from apps.core.permissions import IsAthleteUser
 from apps.daily_records.models import DailyRecords
 from apps.daily_records.serializers import DailyRecordsSerializer
-from apps.core.permissions import IsAthleteUser
 
 
 class DailyRecordsViewSet(viewsets.ModelViewSet):

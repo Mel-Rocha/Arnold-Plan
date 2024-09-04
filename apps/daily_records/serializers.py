@@ -1,8 +1,8 @@
 import logging
 from rest_framework import serializers
 
-from apps.daily_records.models import DailyRecords
 from apps.user.models import Athlete
+from apps.daily_records.models import DailyRecords
 
 
 logger = logging.getLogger(__name__)

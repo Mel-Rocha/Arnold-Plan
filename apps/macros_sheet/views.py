@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied, NotFound
 
+from apps.core.permissions import IsNutritionistUser, IsAthleteUser
 from apps.macros_sheet.models import MealMacrosSheet, DietMacrosSheet
 from apps.macros_sheet.serializers import MealMacrosSheetSerializer, DietMacrosSheetSerializer
-from apps.core.permissions import IsNutritionistUser, IsAthleteUser
 
 
 class MealMacrosSheetViewSet(viewsets.ViewSet):

@@ -4,9 +4,9 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 
 from apps.meal.models import Meal
 from apps.diet.models import Diet
+from config.urls import swagger_safe
 from apps.meal.serializers import MealSerializer
 from apps.core.permissions import IsNutritionistUser, IsAthleteUser
-from config.urls import swagger_safe
 
 
 class MealViewSet(viewsets.ModelViewSet):

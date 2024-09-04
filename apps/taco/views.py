@@ -1,8 +1,8 @@
 import ast
 
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 
 from apps.taco.exceptions import InvalidCategoryError
 from apps.taco.serializers import CMVColtaco3Serializer
