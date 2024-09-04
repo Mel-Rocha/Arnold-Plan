@@ -1,3 +1,4 @@
+from rest_framework import generics
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, \
@@ -91,3 +92,51 @@ class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, Retriev
         """
         raise NotImplementedError("Subclasses must implement `get_related_model_class`.")
 
+
+class AthleteNutritionistFilterMixin(generics.RetrieveAPIView):
+    # ACHO Q NÂO ESTAMOS USANDO ISSO, VERIFICAR
+    """
+    Mixin para filtrar querysets com base no tipo de usuário e outras condições.
+
+    **Argumentos:**
+        filter_fields: Lista de campos a serem filtrados.
+        lookup_field: Campo utilizado para buscar o objeto.
+        permission_classes: Classes de permissão adicionais.
+
+    **Exemplo de uso:**
+        class MyView(generics.ListAPIView, AthleteNutritionistFilterMixin):
+            queryset = MyModel.objects.all()
+            serializer_class = MySerializer
+            filter_fields = ['name', 'created_at']
+            permission_classes = [IsAuthenticated]
+    """
+
+    filter_fields = []
+    lookup_field = 'uuid'
+    permission_classes = []
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filtragem básica por usuário (pode ser personalizada)
+        user = self.request.user
+        if user.is_athlete:
+            queryset = queryset.filter(meal__diet__athlete__user=user)
+        elif user.is_nutritionist:
+            queryset = queryset.filter(meal__diet__nutritionist__user=user)
+        else:
+            raise PermissionDenied("Você não tem permissão para acessar este recurso.")
+
+        # Filtragem adicional com base nos campos definidos em filter_fields
+        for field in self.filter_fields:
+            value = self.request.query_params.get(field)
+            if value:
+                queryset = queryset.filter(**{f'{field}__icontains': value})
+
+        return queryset
+
+    def get_permissions(self):
+        """
+        Retorna as permissões para a view.
+        """
+        return [permission() for permission in self.permission_classes]

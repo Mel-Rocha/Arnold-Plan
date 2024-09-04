@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class MealMacrosSheet(Core):
-    meal = models.OneToOneField(Meal, related_name='macros_sheet', on_delete=models.CASCADE)
+    meal = models.OneToOneField(Meal, related_name='meal_macros_sheet', on_delete=models.CASCADE)
 
     @property
     def cho(self):
@@ -37,44 +37,65 @@ class MealMacrosSheet(Core):
     @property
     def cho_proportion(self):
         """Calcula a proporção de carboidratos (CHO) em relação ao peso do atleta."""
-        proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
-        return round(proportions.cho_proportion, 2)
+        try:
+            proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
+            return round(proportions.cho_proportion, 2)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def ptn_proportion(self):
         """Calcula a proporção de proteínas (PTN) em relação ao peso do atleta."""
-        proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
-        return round(proportions.ptn_proportion, 2)
+        try:
+            proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
+            return round(proportions.ptn_proportion, 2)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def fat_proportion(self):
         """Calcula a proporção de gorduras (FAT) em relação ao peso do atleta."""
-        proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
-        return round(proportions.fat_proportion, 2)
+        try:
+            proportions = ProportionGKG(self.meal.diet.athlete.weight, self.cho, self.ptn, self.fat)
+            return round(proportions.fat_proportion, 2)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def cho_level(self):
         """Calcula o nível de carboidratos (CHO) da refeição."""
-        return CalcMacroLevel.calculate_macro_level(self.cho, self.kcal, 'cho')
+        try:
+            return CalcMacroLevel.calculate_macro_level(self.cho, self.kcal, 'cho')
+        except ZeroDivisionError:
+            return 0
 
     @property
     def ptn_level(self):
         """Calcula o nível de proteínas (PTN) da refeição."""
-        return CalcMacroLevel.calculate_macro_level(self.ptn, self.kcal, 'ptn')
+        try:
+            return CalcMacroLevel.calculate_macro_level(self.ptn, self.kcal, 'ptn')
+        except ZeroDivisionError:
+            return 0
 
     @property
     def fat_level(self):
         """Calcula o nível de gorduras (FAT) da refeição."""
-        return CalcMacroLevel.calculate_macro_level(self.fat, self.kcal, 'fat')
+        try:
+            return CalcMacroLevel.calculate_macro_level(self.fat, self.kcal, 'fat')
+        except ZeroDivisionError:
+            return 0
 
     @property
     def kcal_level(self):
         """Calcula o nível de calorias (KCAL) da refeição."""
-        return KcalLevel.calculate_kcal_level(self.kcal)
+        try:
+            return KcalLevel.calculate_kcal_level(self.kcal)
+        except ZeroDivisionError:
+            return 0
 
 
 class DietMacrosSheet(Core):
-    diet = models.OneToOneField(Diet, related_name='macros_sheet', on_delete=models.CASCADE)
+    diet = models.OneToOneField(Diet, related_name='diet_macros_sheet', on_delete=models.CASCADE)
 
     @property
     def cho(self):
@@ -103,37 +124,58 @@ class DietMacrosSheet(Core):
     @property
     def cho_proportion(self):
         """Calcula a proporção de carboidratos (CHO) em relação ao peso do atleta da dieta."""
-        proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
-        return round(proportions.cho_proportion, 2)
+        try:
+            proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
+            return round(proportions.cho_proportion, 2)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def ptn_proportion(self):
         """Calcula a proporção de proteínas (PTN) em relação ao peso do atleta da dieta."""
-        proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
-        return round(proportions.ptn_proportion, 2)
+        try:
+            proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
+            return round(proportions.ptn_proportion, 2)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def fat_proportion(self):
         """Calcula a proporção de gorduras (FAT) em relação ao peso do atleta da dieta."""
-        proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
-        return round(proportions.fat_proportion, 2)
+        try:
+            proportions = ProportionGKG(self.diet.athlete.weight, self.cho, self.ptn, self.fat)
+            return round(proportions.fat_proportion, 2)
+        except ZeroDivisionError:
+            return 0
 
     @property
     def cho_level(self):
         """Calcula o nível de carboidratos (CHO) da dieta."""
-        return CalcMacroLevel.calculate_macro_level(self.cho, self.kcal, 'cho')
+        try:
+            return CalcMacroLevel.calculate_macro_level(self.cho, self.kcal, 'cho')
+        except ZeroDivisionError:
+            return 0
 
     @property
     def ptn_level(self):
         """Calcula o nível de proteínas (PTN) da dieta."""
-        return CalcMacroLevel.calculate_macro_level(self.ptn, self.kcal, 'ptn')
+        try:
+            return CalcMacroLevel.calculate_macro_level(self.ptn, self.kcal, 'ptn')
+        except ZeroDivisionError:
+            return 0
 
     @property
     def fat_level(self):
         """Calcula o nível de gorduras (FAT) da dieta."""
-        return CalcMacroLevel.calculate_macro_level(self.fat, self.kcal, 'fat')
+        try:
+            return CalcMacroLevel.calculate_macro_level(self.fat, self.kcal, 'fat')
+        except ZeroDivisionError:
+            return 0
 
     @property
     def kcal_level(self):
         """Calcula o nível de calorias (KCAL) da dieta."""
-        return KcalLevel.calculate_kcal_level(self.kcal)
+        try:
+            return KcalLevel.calculate_kcal_level(self.kcal)
+        except ZeroDivisionError:
+            return 0
