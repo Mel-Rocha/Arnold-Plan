@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework.decorators import action
 
 from apps.core import gateway
 from apps.core.gateway import response_log_user
@@ -12,6 +13,7 @@ from apps.user.models import  Nutritionist, Athlete
 from apps.core.permissions import IsNotAthleteUserAndIsNotNutritionist, IsOwnerOrReadOnly
 from apps.user.serializers import MyTokenObtainPairSerializer, UpdatePasswordSerializer, \
     UserSerializerCreateOrUpdate, AthleteSerializer, NutritionistSerializer
+from apps.core.permissions import IsNutritionistUser
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -84,6 +86,23 @@ class AthleteViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [IsAuthenticated(), IsNotAthleteUserAndIsNotNutritionist()]
         return [IsAuthenticated(), IsOwnerOrReadOnly()]
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsNutritionistUser])
+    def my_athletes(self, request):
+        """List all athletes related to the authenticated nutritionist."""
+        user = request.user
+        if hasattr(user, 'nutritionist'):
+            athletes = self.queryset.filter(nutritionist=user.nutritionist)
+            serializer = self.get_serializer(athletes, many=True)
+            return Response(serializer.data)
+        return Response({"detail": "Not found."}, status=404)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsNutritionistUser])
+    def without_nutritionist(self, request):
+        """List all athletes that don't have a nutritionist."""
+        athletes = self.queryset.filter(nutritionist__isnull=True)
+        serializer = self.get_serializer(athletes, many=True)
+        return Response(serializer.data)
 
 
 # Nutritionist
