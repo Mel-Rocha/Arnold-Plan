@@ -1,3 +1,4 @@
+import datetime
 import pytest
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -18,7 +19,6 @@ def api_client():
 
 
 @pytest.fixture
-@pytest.mark.django_db
 def create_user():
     def _create_user(username='testuser', password='password'):
         user = User.objects.create_user(username=username, password=password)
@@ -34,7 +34,12 @@ def create_nutritionist(create_user):
 @pytest.fixture
 def create_athlete(create_user):
     user = create_user(username='athlete', password='password')
-    Athlete.objects.create(user=user)
+    Athlete.objects.create(
+        user=user,
+        birth_date = datetime.date(2000, 1, 1),
+        weight = 70,
+        height= 1.70,
+        )
     return user
 
 @pytest.fixture
@@ -47,7 +52,6 @@ def create_diet(create_nutritionist, create_athlete):
     return diet, athlete
 
 @pytest.fixture
-@pytest.mark.django_db
 def create_records(create_diet):
     diet, athlete = create_diet
     date_today = timezone.now().date()
@@ -62,6 +66,7 @@ def create_records(create_diet):
         date=date_today
     )
 
+@pytest.mark.django_db
 def test_get_daily_records_by_date(api_client, create_records, create_athlete):
     user = create_athlete
     api_client.force_authenticate(user=user)
@@ -71,6 +76,7 @@ def test_get_daily_records_by_date(api_client, create_records, create_athlete):
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == 2  # Assuming 2 records are created
 
+@pytest.mark.django_db
 def test_get_daily_records_by_date_range(api_client, create_records, create_athlete):
     user = create_athlete
     api_client.force_authenticate(user=user)
@@ -81,6 +87,7 @@ def test_get_daily_records_by_date_range(api_client, create_records, create_athl
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == 2  # Assuming 2 records are created
 
+@pytest.mark.django_db
 def test_get_daily_records_by_diet(api_client, create_records, create_nutritionist):
     user = create_nutritionist
     api_client.force_authenticate(user=user)
@@ -90,6 +97,7 @@ def test_get_daily_records_by_diet(api_client, create_records, create_nutritioni
     assert response.status_code == status.HTTP_200_OK
     assert len(response.data) == 2  # Assuming 2 records are created
 
+@pytest.mark.django_db
 def test_get_daily_records_permissions(api_client, create_athlete):
     url = reverse('dailyrecords-list')
     response = api_client.get(url)
