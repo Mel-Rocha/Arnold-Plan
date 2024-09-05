@@ -1,9 +1,8 @@
 from django.apps import apps
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.core.validators import MinValueValidator
-from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.core.validators import MinValueValidator
 
 from apps.core.models import Core
 from apps.user.models import Athlete, Nutritionist

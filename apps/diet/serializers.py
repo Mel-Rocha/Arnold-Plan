@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
-from apps.daily_records.models import DailyRecords
 from apps.diet.models import Diet
 from apps.meal.models import Meal
 from apps.meal.serializers import MealSerializer
+from apps.daily_records.models import DailyRecords
 from apps.user.models import Nutritionist, Athlete
 
 
@@ -29,13 +29,11 @@ class DietSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
 
-        # Verificar se o usuário é um nutricionista
         try:
             nutritionist = Nutritionist.objects.get(user=user)
         except Nutritionist.DoesNotExist:
             raise ValidationError("Only a nutritionist can update the diet.")
 
-        # Verificar se o usuário tem um atleta associado
         athlete = Athlete.objects.filter(nutritionist=nutritionist).first()
         if not athlete:
             raise ValidationError("No athlete associated with this nutritionist.")

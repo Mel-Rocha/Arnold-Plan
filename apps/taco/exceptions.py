@@ -2,8 +2,8 @@ from rest_framework.exceptions import APIException
 
 
 class InvalidCategoryError(APIException):
-    status_code = 400  # Define o status code para 400 Bad Request
-    default_detail = "Categoria inválida."  # Mensagem padrão para categoria inválida
+    status_code = 400
+    default_detail = "Categoria inválida."
 
     VALID_CATEGORIES = [
         "Cereais e derivados",

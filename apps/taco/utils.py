@@ -16,6 +16,6 @@ def get_retention_db_connection():
 
 
 class CustomPageNumberPagination(PageNumberPagination):
-    page_size = 10  # Número de itens por página padrão
+    page_size = 10
     page_size_query_param = 'page_size'
-    max_page_size = 100  # Máximo de itens por página
+    max_page_size = 100

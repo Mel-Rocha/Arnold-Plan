@@ -10,7 +10,6 @@ from decouple import config
 from datetime import datetime
 from dataclasses import dataclass
 from django.dispatch import receiver
-from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import AccessToken
 from django_rest_passwordreset.signals import reset_password_token_created
 

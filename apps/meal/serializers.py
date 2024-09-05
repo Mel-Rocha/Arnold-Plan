@@ -37,10 +37,10 @@ class MealSerializer(serializers.ModelSerializer):
             if not (1 <= food_id <= 597):
                 raise serializers.ValidationError("Food ID must be between 1 and 597.")
 
-            # Buscar os detalhes completos do alimento no banco de retenção e ajustar valores
+            # Fetch complete food details in the holding bank and adjust values
             food_details = self.get_food_details(food_id, quantity)
 
-            # Adicionar os detalhes completos do alimento à lista de foods da refeição
+            # Add full food details to the meal's food list
             meal.foods.append(food_details)
 
         meal.save()
@@ -50,7 +50,7 @@ class MealSerializer(serializers.ModelSerializer):
         foods = validated_data.pop('foods', [])
         instance = super().update(instance, validated_data)
 
-        instance.foods.clear()  # Limpar a lista existente de foods antes de atualizar
+        instance.foods.clear()  # Clear existing list of foods before updating
 
         for food in foods:
             food_id = food.get('food_id')
@@ -59,17 +59,17 @@ class MealSerializer(serializers.ModelSerializer):
             if not (1 <= food_id <= 597):
                 raise serializers.ValidationError("Food ID must be between 1 and 597.")
 
-            # Buscar os detalhes completos do alimento no banco de retenção e ajustar valores
+            # Fetch complete food details in the holding bank and adjust values
             food_details = self.get_food_details(food_id, quantity)
 
-            # Adicionar os detalhes completos do alimento à lista de foods da refeição
+            # Add full food details to the meal's food list
             instance.foods.append(food_details)
 
         instance.save()
         return instance
 
     def get_food_details(self, food_id, amount):
-        # Implementação para buscar os detalhes do alimento no banco de retenção e ajustar valores
+        # Implementation to fetch food details from the retention bank and adjust values
         query = "SELECT * FROM CMVColtaco3 WHERE id = %s"
         params = [food_id]
 
@@ -89,10 +89,10 @@ class MealSerializer(serializers.ModelSerializer):
                                 value = float(food[key])
                                 food[key] = round((value * amount) / 100, 3)
                             except ValueError:
-                                # Se a conversão para float falhar, mantém o valor original
+                                # If the conversion to float fails, it keeps the original value
                                 continue
 
-                    # Adicionar a quantidade ao dicionário de detalhes do alimento
+                    # Add quantity to food details dictionary
                     food['quantity'] = amount
 
                     return food

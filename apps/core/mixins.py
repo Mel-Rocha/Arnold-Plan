@@ -1,4 +1,3 @@
-from rest_framework import generics
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, \

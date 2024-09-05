@@ -14,7 +14,7 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         return Diet
 
     def get_related_model_id(self):
-        return self.request.data.get('athlete')  # Obtendo o ID do atleta
+        return self.request.data.get('athlete')
 
     def get_related_model_class(self):
         return Athlete

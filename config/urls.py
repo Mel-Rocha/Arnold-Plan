@@ -1,5 +1,3 @@
-import functools
-
 from drf_yasg import openapi
 from django.contrib import admin
 from django.urls import path, include
@@ -7,21 +5,12 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 
 
-def swagger_safe(model):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
-            if getattr(self, 'swagger_fake_view', False):
-                return model.objects.none()
-            return func(self, *args, **kwargs)
-        return wrapper
-    return decorator
 
 
 schema_view = get_schema_view(
     openapi.Info(
         title="Arnold Plan",
-        default_version='v0 - Minimum Viable Product',
+        default_version='v1 - Minimum Viable Product',
         description="End-points for the Arnold Plan API in Django Rest",
         terms_of_service="terms",
         contact=openapi.Contact(email="rochamel73@gmail.com"),
