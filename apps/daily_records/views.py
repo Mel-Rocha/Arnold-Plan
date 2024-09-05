@@ -1,9 +1,9 @@
+from drf_yasg import openapi
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
 
 from config.urls import swagger_safe
 from apps.user.models import Nutritionist
@@ -67,6 +67,22 @@ class DailyRecordsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'start_date', openapi.IN_QUERY,
+                description="Start date of the range (format: YYYY-MM-DD)",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'end_date', openapi.IN_QUERY,
+                description="End date of the range (format: YYYY-MM-DD)",
+                type=openapi.TYPE_STRING
+            )
+        ],
+        responses={200: DailyRecordsSerializer(many=True)}
+    )
     @action(detail=False, methods=['get'], url_path='by-date-range')
     def get_by_date_range(self, request):
         """
@@ -88,6 +104,16 @@ class DailyRecordsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'diet_id', openapi.IN_QUERY,
+                description="ID of the diet to filter records",
+                type=openapi.TYPE_INTEGER
+            )
+        ],
+        responses={200: DailyRecordsSerializer(many=True)}
+    )
     @action(detail=False, methods=['get'], url_path='by-diet')
     def get_by_diet(self, request):
         """
