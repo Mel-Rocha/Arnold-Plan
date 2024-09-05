@@ -2,9 +2,9 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from apps.core.models import Core
-from apps.core.validators import validate_not_in_future
 from apps.meal.models import Meal
 from apps.user.models import Athlete
+from apps.core.validators import validate_not_in_future
 
 
 class MealStatus(models.TextChoices):
@@ -34,7 +34,6 @@ class DailyRecords(Core):
     meal = models.ForeignKey(Meal, related_name='daily_records', on_delete=models.PROTECT)
     date = models.DateField(validators=[validate_not_in_future])
 
-    # Usando TextChoices para os enums
     meal_status = models.CharField(
         max_length=20,
         choices=MealStatus.choices,
@@ -53,7 +52,7 @@ class DailyRecords(Core):
     observations = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Validação para garantir que food_replacement seja obrigatório em casos de "Partially Done" ou "Not Done"
+        # Validation to ensure that food_replacement is mandatory in cases of "Partially Done" or "Not Done"
         if self.meal_status in [MealStatus.PARTIALLY_DONE, MealStatus.NOT_DONE] and not self.food_replacement:
             raise ValidationError("Food replacement is required for 'Partially Done' or 'Not Done' status.")
         super().save(*args, **kwargs)

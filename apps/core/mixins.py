@@ -23,13 +23,13 @@ class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, Retriev
         model_class = self.get_queryset_model_class()
 
         if hasattr(user, 'athlete'):
-            # Se o usuário é um atleta, filtrar por objetos associados ao atleta
+            # If the user is an athlete, filter by objects associated with the athlete
             return model_class.objects.filter(athlete=user.athlete)
         elif hasattr(user, 'nutritionist'):
-            # Se o usuário é um nutricionista, filtrar por objetos dos atletas associados
+            # If the user is a nutritionist, filter by associated athlete objects
             return model_class.objects.filter(athlete__nutritionist=user.nutritionist)
         else:
-            # Caso contrário, não permitir acesso
+            # Otherwise, do not allow access
             return model_class.objects.none()
 
 
@@ -50,7 +50,7 @@ class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, Retriev
         except related_model_class.DoesNotExist:
             raise PermissionDenied("Cannot create object for a related model not associated with this nutritionist.")
 
-        # Salva a instância do serializer com o modelo relacionado corretamente
+        # Saves the serializer instance with the related model correctly
         serializer.save()
 
 
@@ -82,61 +82,12 @@ class AthleteNutritionistPermissionMixin(GenericViewSet, ListModelMixin, Retriev
 
     def get_related_model_id(self):
         """
-        Método a ser implementado pelas subclasses para obter o ID do modelo relacionado para a operação de criação.
+        Method to be implemented by subclasses to obtain the related model ID for the create operation.
         """
         raise NotImplementedError("Subclasses must implement `get_related_model_id`.")
 
     def get_related_model_class(self):
         """
-        Método a ser implementado pelas subclasses para obter a classe do modelo relacionado para a operação de criação.
+        Method to be implemented by subclasses to obtain the related model class for the create operation.
         """
         raise NotImplementedError("Subclasses must implement `get_related_model_class`.")
-
-
-class AthleteNutritionistFilterMixin(generics.RetrieveAPIView):
-    # ACHO Q NÂO ESTAMOS USANDO ISSO, VERIFICAR
-    """
-    Mixin para filtrar querysets com base no tipo de usuário e outras condições.
-
-    **Argumentos:**
-        filter_fields: Lista de campos a serem filtrados.
-        lookup_field: Campo utilizado para buscar o objeto.
-        permission_classes: Classes de permissão adicionais.
-
-    **Exemplo de uso:**
-        class MyView(generics.ListAPIView, AthleteNutritionistFilterMixin):
-            queryset = MyModel.objects.all()
-            serializer_class = MySerializer
-            filter_fields = ['name', 'created_at']
-            permission_classes = [IsAuthenticated]
-    """
-
-    filter_fields = []
-    lookup_field = 'uuid'
-    permission_classes = []
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-
-        # Filtragem básica por usuário (pode ser personalizada)
-        user = self.request.user
-        if user.is_athlete:
-            queryset = queryset.filter(meal__diet__athlete__user=user)
-        elif user.is_nutritionist:
-            queryset = queryset.filter(meal__diet__nutritionist__user=user)
-        else:
-            raise PermissionDenied("Você não tem permissão para acessar este recurso.")
-
-        # Filtragem adicional com base nos campos definidos em filter_fields
-        for field in self.filter_fields:
-            value = self.request.query_params.get(field)
-            if value:
-                queryset = queryset.filter(**{f'{field}__icontains': value})
-
-        return queryset
-
-    def get_permissions(self):
-        """
-        Retorna as permissões para a view.
-        """
-        return [permission() for permission in self.permission_classes]

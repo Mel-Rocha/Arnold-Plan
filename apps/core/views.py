@@ -17,42 +17,10 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from apps.user.models import User
 
 
-SQADMAIL_URL = config('SQADMAIL_URL')
-SQADMAIL_FROM = config('SQADMAIL_FROM')
-SQADMAIL_TOKEN = config('SQADMAIL_TOKEN')
-SQADMAIL_TEMPLATE_RESET_PASSWORD = config('SQADMAIL_TEMPLATE_RESET_PASSWORD')
-
-
-class IsStaffUser(BasePermission):
-    """
-    Permite acesso aos usuário Staff's
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_staff
-
-
-class IsAdminUser(BasePermission):
-    """
-    Permite acesso aos utilizadores Administradores
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_admin
-
-
-class IsRepresentativeUser(BasePermission):
-    """
-    Permite acesso aos utilizadores Representantes da empresa ao qual faz parte
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_representative
-
-
-class IsApiUser(BasePermission):
-    """
-    Permite acesso aos utilizadores (API)'s
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.api_user
+EMAIL_URL = config('EMAIL_URL')
+EMAIL_FROM = config('EMAIL_FROM')
+EMAIL_TOKEN = config('EMAIL_TOKEN')
+EMAIL_TEMPLATE_RESET_PASSWORD = config('EMAIL_TEMPLATE_RESET_PASSWORD')
 
 
 def validate_password(pswrd: str):
@@ -98,9 +66,9 @@ def read_token(access_token):
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
     MailSending(
         subject="Recuperação de senha",
-        from_email=SQADMAIL_FROM,
+        from_email=EMAIL_FROM,
         recipient_list=[reset_password_token.user.email],
-        template_id=SQADMAIL_TEMPLATE_RESET_PASSWORD,
+        template_id=EMAIL_TEMPLATE_RESET_PASSWORD,
         context_template={
             "%name%": reset_password_token.user.first_name,
             "%token%": str(reset_password_token.key)
@@ -142,25 +110,14 @@ class MailSending:
             'payload': payload,
             'headers': {
                 'Content-Type': content_type,
-                'Authorization': F"Bearer {SQADMAIL_TOKEN}"
+                'Authorization': F"Bearer {EMAIL_TOKEN}"
             }
         }
 
     def send_email(self):
         params = self.get_payload()
 
-        response = requests.request("POST", SQADMAIL_URL, data=params["payload"], headers=params["headers"])
+        response = requests.request("POST", EMAIL_URL, data=params["payload"], headers=params["headers"])
 
         print(response.text)
 
-
-def product_display(value):
-    values = {
-        '1': 'Trator',
-        '2': 'Helicóptero',
-        '3': 'Semirreboque',
-        '4': 'Carroceria',
-        '5': 'Caminhões',
-        '6': 'Colheitadeiras'
-    }
-    return values[value]
