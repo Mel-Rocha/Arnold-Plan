@@ -114,6 +114,27 @@ for url in urls:
     print(url)
 ```
 
+# Testes e Segurança
+### Segurança
+Verificar vulnerabilidades de segurança
+```bash
+pip-audit
+```
+
+### Testes
+Execute os testes e meça a cobertura do que foi testado
+```bash
+coverage run -m pytest
+```
+
+Relatório de cobertura
+```bash
+coverage report # Visualização simples
+
+coverage report -m # Visualização detalhada
+```
+
+
 # Template .env 📝
 ```bash
 # GERAL
