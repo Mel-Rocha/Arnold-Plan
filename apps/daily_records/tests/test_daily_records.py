@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.db import IntegrityError, transaction
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -151,37 +150,35 @@ def test_daily_record_duplicate_failure(api_client, create_daily_record, create_
     athlete = create_athlete(username='athlete')
     diet = create_diet(athlete=athlete)
 
-    # Autenticar o cliente com o usuário criado
     api_client.force_authenticate(user=athlete.user)
 
-    # Criação do primeiro registro diário usando a API
     response = api_client.post(reverse('daily_records-list'), {
         'athlete': athlete.id,
         'meal': diet.meals.first().id,
-        'date': '2024-09-06',
-        'meal_status': 'Done',
-        'feeling_status': 'Good',
-        'appetite_status': 'Normal',
+        'date': '2024-09-05',
+        "meal_status": "done",
+        "feeling_status": "happy",
+        "appetite_status": "hunger",
         'food_replacement': 'N/A',
         'observations': 'All good.'
     })
 
+    print(f'First response status: {response.status_code}')
+    print(f'First response data: {response.data}')
+
     assert response.status_code == status.HTTP_201_CREATED
 
-    # Tentativa de criar um segundo registro para a mesma refeição e data
     response = api_client.post(reverse('daily_records-list'), {
         'athlete': athlete.id,
         'meal': diet.meals.first().id,
-        'date': '2024-09-06',  # Mesmo dia
-        'meal_status': 'Pending',
-        'feeling_status': 'Tired',
-        'appetite_status': 'Hungry',
-        'food_replacement': 'None',
+        'date': '2024-09-05',  # Mesmo dia
+        "meal_status": "done",
+        "feeling_status": "happy",
+        "appetite_status": "hunger",
+        'food_replacement': 'N/A',
         'observations': 'Should fail due to duplicate.'
     })
 
-    # Verifique se o código de status é 400 (Bad Request)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    # Opcionalmente, você pode verificar se a resposta contém a mensagem de erro apropriada
-    assert 'non_field_errors' in response.data
+    assert 'A DailyRecord for this meal and date already exists.' in response.data
