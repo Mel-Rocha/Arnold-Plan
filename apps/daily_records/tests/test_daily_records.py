@@ -1,7 +1,10 @@
 import datetime
 
 import pytest
+from django.db import IntegrityError, transaction
+from django.urls import reverse
 from django.utils import timezone
+from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.meal.models import Meal
@@ -141,3 +144,44 @@ def test_daily_record_creation(create_daily_record, create_athlete, create_diet)
     assert daily_record.appetite_status == 'Normal'
     assert daily_record.food_replacement == 'N/A'
     assert daily_record.observations == 'All good.'
+
+
+@pytest.mark.django_db
+def test_daily_record_duplicate_failure(api_client, create_daily_record, create_athlete, create_diet):
+    athlete = create_athlete(username='athlete')
+    diet = create_diet(athlete=athlete)
+
+    # Autenticar o cliente com o usuário criado
+    api_client.force_authenticate(user=athlete.user)
+
+    # Criação do primeiro registro diário usando a API
+    response = api_client.post(reverse('daily_records-list'), {
+        'athlete': athlete.id,
+        'meal': diet.meals.first().id,
+        'date': '2024-09-06',
+        'meal_status': 'Done',
+        'feeling_status': 'Good',
+        'appetite_status': 'Normal',
+        'food_replacement': 'N/A',
+        'observations': 'All good.'
+    })
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    # Tentativa de criar um segundo registro para a mesma refeição e data
+    response = api_client.post(reverse('daily_records-list'), {
+        'athlete': athlete.id,
+        'meal': diet.meals.first().id,
+        'date': '2024-09-06',  # Mesmo dia
+        'meal_status': 'Pending',
+        'feeling_status': 'Tired',
+        'appetite_status': 'Hungry',
+        'food_replacement': 'None',
+        'observations': 'Should fail due to duplicate.'
+    })
+
+    # Verifique se o código de status é 400 (Bad Request)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    # Opcionalmente, você pode verificar se a resposta contém a mensagem de erro apropriada
+    assert 'non_field_errors' in response.data
