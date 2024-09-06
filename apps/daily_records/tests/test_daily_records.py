@@ -73,8 +73,8 @@ def create_diet(create_nutritionist, create_athlete):
             nutritionist=athlete.nutritionist,
             goal="Cutting Plan",
             observations="Focus on high protein intake",
-            initial_date=timezone.now().date(),
-            final_date=timezone.now().date() + timezone.timedelta(days=30),
+            initial_date="2024-09-05",
+            final_date="2024-10-05",
             weeks=4,
             type_of_diet='MAINTENANCE'
         )
@@ -171,7 +171,7 @@ def test_daily_record_duplicate_failure(api_client, create_daily_record, create_
     response = api_client.post(reverse('daily_records-list'), {
         'athlete': athlete.id,
         'meal': diet.meals.first().id,
-        'date': '2024-09-05',  # Mesmo dia
+        'date': '2024-09-05',  # Some day
         "meal_status": "done",
         "feeling_status": "happy",
         "appetite_status": "hunger",

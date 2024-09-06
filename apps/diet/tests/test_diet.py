@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.diet.models import Diet
@@ -81,8 +80,8 @@ def test_nutritionist_can_create_diet_for_own_athlete(create_nutritionist, creat
         athlete=athlete,
         goal="Cutting Plan",
         observations="Focus on high protein intake",
-        initial_date=timezone.now().date(),
-        final_date=timezone.now().date() + timezone.timedelta(days=30),
+        initial_date="2024-09-05",
+        final_date="2024-10-05",
         weeks=4,
         type_of_diet='MAINTENANCE'
     )
