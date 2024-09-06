@@ -34,6 +34,7 @@ THIRD_APPS = [
     'corsheaders',
     'django_rest_passwordreset',
     'sortedm2m',
+    'django_extensions',
 ]
 
 LOCAL_APPS = [

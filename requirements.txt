@@ -12,6 +12,7 @@ defusedxml==0.7.1
 dj-database-url==1.0.0
 Django==4.0.4
 django-cors-headers==3.13.0
+django-extensions==3.2.3
 django-filter==21.1
 django-multiselectfield==0.1.12
 django-rest-passwordreset==1.2.1
