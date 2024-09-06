@@ -61,7 +61,12 @@ python manage.py insert_taco
 ```bash
 python manage.py runserver
 ```
-
+Rodar em Container 🐳
+* De os comandos do passo 4, de criação e inserção da tabelas;
+* Inicie os containers
+```bash
+docker-compose up --build
+```
 
 
 ## Comandos Uteis Django 🚀
