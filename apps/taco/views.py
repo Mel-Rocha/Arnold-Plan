@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from apps.taco.exceptions import InvalidCategoryError
 from apps.taco.serializers import CMVColtaco3Serializer
-from apps.taco.utils import get_retention_db_connection
+from apps.taco.utils import get_retention_db_connection, fetch_foods
 
 
 class CMVColtaco3ListView(APIView):
@@ -15,6 +15,7 @@ class CMVColtaco3ListView(APIView):
 
     Parameters:
     optional:
+    - description: (str) Description of the food.
     - page: (int) Page number.
     - page_size: (int) Number of records per page.
 
@@ -25,10 +26,10 @@ class CMVColtaco3ListView(APIView):
     @staticmethod
     def get(request):
         description = request.query_params.get('description', None)
-        page = int(request.query_params.get('page', 1))  # Página atual
-        page_size = int(request.query_params.get('page_size', 10))  # Tamanho da página
+        page = int(request.query_params.get('page', 1))  # Current page
+        page_size = int(request.query_params.get('page_size', 10))  # Page size
 
-        # Construa a query para obter o total de registros
+        # Fetch total record count
         count_query = "SELECT COUNT(*) FROM CMVColtaco3"
         if description:
             count_query += " WHERE food_description LIKE %s"
@@ -41,32 +42,18 @@ class CMVColtaco3ListView(APIView):
                 cursor.execute(count_query, count_params)
                 total_records = cursor.fetchone()[0]
 
-        # Construa a query para obter os registros paginados
-        query = "SELECT * FROM CMVColtaco3"
-        if description:
-            query += " WHERE food_description LIKE %s"
-        query += " LIMIT %s OFFSET %s"
-        params = []
-        if description:
-            params.append(f'%{description}%')
-        params.extend([page_size, (page - 1) * page_size])
+        # Fetch paginated records
+        foods = fetch_foods(description)
+        start_index = (page - 1) * page_size
+        paged_foods = foods[start_index:start_index + page_size]
 
-        # Execute a query no banco de retenção
-        with get_retention_db_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params)
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
+        # Serialize the data
+        serializer = CMVColtaco3Serializer(paged_foods, many=True)
 
-        foods = [dict(zip(columns, row)) for row in rows]
-
-        # Serializando os dados
-        serializer = CMVColtaco3Serializer(foods, many=True)
-
-        # Calcular total de páginas
+        # Calculate total pages
         total_pages = (total_records + page_size - 1) // page_size
 
-        # Montar a resposta com informações de paginação
+        # Build response with pagination info
         response_data = {
             'total_records': total_records,
             'total_pages': total_pages,
@@ -76,6 +63,30 @@ class CMVColtaco3ListView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+class CMVColtaco3ListAllView(APIView):
+    """
+    Objective: List all foods without pagination.
+
+    Parameters:
+    optional:
+    - description: (str) Description of the food.
+
+    Returns:
+    JSON.
+    """
+
+    @staticmethod
+    def get(request):
+        description = request.query_params.get('description', None)
+
+        # Fetch all records
+        foods = fetch_foods(description)
+
+        # Serialize the data
+        serializer = CMVColtaco3Serializer(foods, many=True)
+
+        return Response({'results': serializer.data}, status=status.HTTP_200_OK)
 
 
 class CMVColtaco3DetailView(APIView):
