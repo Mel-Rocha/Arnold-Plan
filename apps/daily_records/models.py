@@ -20,6 +20,7 @@ class FeelingStatus(models.TextChoices):
     SAD = 'sad', 'Sad'
     ANGER = 'anger', 'Anger'
     ANXIETY = 'anxiety', 'Anxiety'
+    FEAR = 'fear', 'Fear'
 
 
 class AppetiteStatus(models.TextChoices):

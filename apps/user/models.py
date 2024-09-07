@@ -39,6 +39,7 @@ class Profile(Core):
 class Category(models.TextChoices):
     MENS_PHYSIQUE = 'MENS_PHYSIQUE', 'Mens Physique'
     BODYBUILDER = 'BODYBUILDER', 'Bodybuilder'
+    CLASSIC = 'CLASSIC', 'Classic'
     WELLNESS = 'WELLNESS', 'Wellness'
     FIGURE = 'FIGURE', 'Figure'
     FIT_MODEL = 'FIT_MODEL', 'Fit Model'
