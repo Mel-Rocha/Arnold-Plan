@@ -109,7 +109,7 @@ class DailyRecordsViewSet(viewsets.ModelViewSet):
             openapi.Parameter(
                 'diet_id', openapi.IN_QUERY,
                 description="ID of the diet to filter records",
-                type=openapi.TYPE_INTEGER
+                type=openapi.TYPE_STRING
             )
         ],
         responses={200: DailyRecordsSerializer(many=True)}
