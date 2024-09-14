@@ -2,6 +2,7 @@ from django.apps import apps
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 
 from apps.core.models import Core
@@ -28,6 +29,21 @@ class Diet(Core):
 
     def __str__(self):
         return f"Diet #{self.id}"
+
+    def clean(self):
+        super().clean()
+        overlapping_diets = Diet.objects.filter(
+        athlete=self.athlete,
+            initial_date__lt=self.final_date,
+            final_date__gt=self.initial_date
+        ).exclude(id=self.id)
+
+        if overlapping_diets.exists():
+            raise ValidationError("The diet dates overlap with another diet for the same athlete.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 @receiver(post_save, sender=Diet)
