@@ -1,5 +1,6 @@
 import logging
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from apps.user.models import Athlete
 from apps.daily_records.models import DailyRecords
@@ -18,6 +19,16 @@ class DailyRecordsSerializer(serializers.ModelSerializer):
             'meal_status': {'required': True},
             'date': {'required': True}
         }
+
+    def validate(self, data):
+        meal = data.get('meal')
+        date = data.get('date')
+
+        # Verificar se a meal pertence a uma diet cujo intervalo de datas cobre a data do daily_record
+        if not (meal.diet.initial_date <= date <= meal.diet.final_date):
+            raise ValidationError("The meal's diet does not cover the date of the daily record.")
+
+        return data
 
     def create(self, validated_data):
         user = self.context['request'].user
