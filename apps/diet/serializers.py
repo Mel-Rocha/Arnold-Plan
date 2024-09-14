@@ -42,17 +42,15 @@ class DietSerializer(serializers.ModelSerializer):
         initial_date = data.get('initial_date', instance.initial_date if instance else None)
         final_date = data.get('final_date', instance.final_date if instance else None)
 
-        # Verificar sobreposição de datas com outras dietas
         overlapping_diets = Diet.objects.filter(
             athlete=athlete,
-            initial_date__lt=final_date,
-            final_date__gt=initial_date
+            initial_date__lte=final_date,
+            final_date__gte=initial_date
         ).exclude(id=instance.id if instance else None)
 
         if overlapping_diets.exists():
             raise ValidationError("The diet dates overlap with another diet for the same athlete.")
 
-        # Verificar se as datas estão dentro do intervalo dos registros diários
         daily_records = DailyRecords.objects.filter(athlete=athlete)
         if daily_records.exists():
             earliest_record = daily_records.order_by('date').first().date
