@@ -51,18 +51,8 @@ class DietSerializer(serializers.ModelSerializer):
         if overlapping_diets.exists():
             raise ValidationError("The diet dates overlap with another diet for the same athlete.")
 
-        daily_records = DailyRecords.objects.filter(athlete=athlete)
-        if daily_records.exists():
-            earliest_record = daily_records.order_by('date').first().date
-            latest_record = daily_records.order_by('date').last().date
-
-            if initial_date > earliest_record:
-                raise ValidationError(
-                    f"Initial date cannot be after the earliest daily record date: {earliest_record}")
-            if final_date < latest_record:
-                raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
-
         return data
+
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -89,6 +79,17 @@ class DietSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         meals_data = validated_data.pop('meals', [])
         instance = super().update(instance, validated_data)
+
+        daily_records = DailyRecords.objects.filter(athlete=instance.athlete)
+        if daily_records.exists():
+            earliest_record = daily_records.order_by('date').first().date
+            latest_record = daily_records.order_by('date').last().date
+
+            if instance.initial_date > earliest_record:
+                raise ValidationError(
+                    f"Initial date cannot be after the earliest daily record date: {earliest_record}")
+            if instance.final_date < latest_record:
+                raise ValidationError(f"Final date cannot be before the latest daily record date: {latest_record}")
 
         for meal_data in meals_data:
             meal_id = meal_data.get('id')
