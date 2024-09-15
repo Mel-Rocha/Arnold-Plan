@@ -136,10 +136,22 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
                     ws.cell(row=row, column=col).border = thin_border
                     ws.cell(row=row, column=col).alignment = Alignment(horizontal='center', vertical='center')
 
-            # Pular uma linha entre as refeições
-            ws.append([""])
+            # Adicionar informações do MealMacrosSheet
+            meal_macros = meal.meal_macros_sheet
+            ws.append(
+                ["", "", "Macros da Refeição", meal_macros.kcal, meal_macros.ptn, meal_macros.cho, meal_macros.fat])
             row_num += 1
 
-        # Salvando o arquivo no response
+        # Adicionar espaço após as refeições
+        ws.append([""])
+        row_num += 1
+
+        # Adicionar informações do DietMacrosSheet
+        diet_macros = diet.diet_macros_sheet
+        ws.append(["", "", "Macros da Dieta", diet_macros.kcal, diet_macros.ptn, diet_macros.cho, diet_macros.fat])
+        ws.append(["", "", "Proporções", f"CHO: {diet_macros.cho_proportion}%", f"PTN: {diet_macros.ptn_proportion}%",
+                   f"FAT: {diet_macros.fat_proportion}%"])
+
+        # Salvando o arquivo
         wb.save(response)
         return response
