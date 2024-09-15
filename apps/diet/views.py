@@ -1,4 +1,6 @@
 from rest_framework import status
+from openpyxl import Workbook
+from django.http import HttpResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -41,3 +43,36 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
             )
 
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=['get'], url_path='export', permission_classes=[IsAuthenticated])
+    def export_diet(self, request, pk=None):
+        diet = self.get_object()
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename=diet_{diet.id}.xlsx'
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Diet"
+
+        # Add headers
+        headers = ["Meal Name", "Time", "Type of Meal", "Food Name", "Quantity", "Unit"]
+        ws.append(headers)
+
+        # Add meal and food data
+        for meal in diet.meals.all():
+            for food in meal.foods:
+                ws.append([
+                    meal.name,
+                    meal.time,
+                    meal.type_of_meal,
+                    food['energy_kcal'],
+                    food['protein'],
+                    food['carbohydrates'],
+                    food['lipids'],
+                    food['quantity'],
+                    food['dietary_fiber'],
+                    food['food_description']
+                ])
+
+        wb.save(response)
+        return response
