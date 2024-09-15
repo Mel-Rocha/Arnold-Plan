@@ -61,10 +61,18 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         ws['A2'] = "Observações"
         ws['A3'] = "Data Inicial"
         ws['A4'] = "Data Final"
+
+        # Mesclando as células da coluna A e B
         ws.merge_cells('A1:B1')
         ws.merge_cells('A2:B2')
         ws.merge_cells('A3:B3')
         ws.merge_cells('A4:B4')
+
+        # Preenchendo as informações na célula mesclada (A) após a mesclagem
+        ws['A1'] = f"Meta: {diet.goal}"  # Preenchendo a meta
+        ws['A2'] = f"Observações: {diet.observations}"  # Preenchendo as observações
+        ws['A3'] = f"Data Inicial: {diet.initial_date.strftime('%Y-%m-%d')}"  # Preenchendo a data inicial
+        ws['A4'] = f"Data Final: {diet.final_date.strftime('%Y-%m-%d')}"  # Preenchendo a data final
 
         # Espaçamento para cabeçalho da tabela de alimentos
         ws.append([""])
