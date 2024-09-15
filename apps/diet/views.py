@@ -56,6 +56,9 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         ws = wb.active
         ws.title = "Diet"
 
+        # Remover as linhas de grade
+        ws.sheet_view.showGridLines = False
+
         # Adicionando meta, observações e datas
         ws['A1'] = "Meta"
         ws['A2'] = "Observações"
@@ -132,6 +135,10 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
                 for row in range(first_row, row_num):
                     ws.cell(row=row, column=col).border = thin_border
                     ws.cell(row=row, column=col).alignment = Alignment(horizontal='center', vertical='center')
+
+            # Pular uma linha entre as refeições
+            ws.append([""])
+            row_num += 1
 
         # Salvando o arquivo no response
         wb.save(response)
