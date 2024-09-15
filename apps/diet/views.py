@@ -1,11 +1,13 @@
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from apps.diet.models import Diet
 from apps.user.models import Athlete
-from apps.diet.serializers import DietSerializer
 from apps.core.permissions import IsAthleteUser
+from apps.diet.serializers import DietSerializer
+from apps.daily_records.models import DailyRecords
 from apps.core.mixins import AthleteNutritionistPermissionMixin
 
 
@@ -26,3 +28,16 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
     def diet_dates(self, request):
         diets = Diet.objects.all().values('id', 'initial_date', 'final_date')
         return Response(diets)
+
+
+    def destroy(self, request, *args, **kwargs):
+        diet = self.get_object()
+        daily_records = DailyRecords.objects.filter(meal__diet=diet)
+
+        if daily_records.exists():
+            return Response(
+                {"detail": "Cannot delete this diet because the athlete has already started executing it and has daily records associated with its meals."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return super().destroy(request, *args, **kwargs)
