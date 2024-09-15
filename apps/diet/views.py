@@ -96,7 +96,7 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
             foods = meal.foods  # Acessando os alimentos da refeição (JSONField)
 
             # Verificar se foods é uma lista de dicionários
-            if isinstance(foods, list):
+            if isinstance(foods, list) and foods:
                 for food in foods:
                     ws.append([
                         meal.name,  # Nome da refeição
@@ -110,6 +110,15 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
                         food.get('dietary_fiber', 0)  # Fibras
                     ])
                     row_num += 1
+            else:
+                # Caso não tenha alimentos na refeição
+                ws.append([
+                    meal.name,  # Nome da refeição
+                    meal.time,  # Horário da refeição
+                    "Sem alimentos",  # Indicação de que não há alimentos
+                    '', '', '', '', '', ''  # Células vazias para as colunas de nutrientes
+                ])
+                row_num += 1
 
             # Verificar se a refeição tem mais de um alimento antes de mesclar
             if row_num - first_row > 1:
