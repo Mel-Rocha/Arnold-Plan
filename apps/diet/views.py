@@ -54,24 +54,22 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         ws = wb.active
         ws.title = "Diet"
 
-        # Add headers
-        headers = ["Meal Name", "Time", "Type of Meal", "Food Name", "Quantity", "Unit"]
+        headers = ["Refeição", "Horário", "Alimento", "kcal", "Proteína (g)", "Carboidráto (g)",
+                   "Lipideos (g)", "Quantidade (g)", "Fibras (g)"]
         ws.append(headers)
 
-        # Add meal and food data
         for meal in diet.meals.all():
             for food in meal.foods:
                 ws.append([
                     meal.name,
                     meal.time,
-                    meal.type_of_meal,
+                    food['food_description'],
                     food['energy_kcal'],
                     food['protein'],
                     food['carbohydrates'],
                     food['lipids'],
                     food['quantity'],
-                    food['dietary_fiber'],
-                    food['food_description']
+                    food['dietary_fiber']
                 ])
 
         wb.save(response)
