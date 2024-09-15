@@ -3,8 +3,8 @@ from rest_framework import status
 from django.http import HttpResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from openpyxl.styles import Border, Side, Alignment
 from rest_framework.permissions import IsAuthenticated
+from openpyxl.styles import Border, Side, Alignment, Font
 
 from apps.diet.models import Diet
 from apps.user.models import Athlete
@@ -72,10 +72,10 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         ws.merge_cells('A4:B4')
 
         # Preenchendo as informações na célula mesclada (A) após a mesclagem
-        ws['A1'] = f"Meta: {diet.goal}"  # Preenchendo a meta
-        ws['A2'] = f"Observações: {diet.observations}"  # Preenchendo as observações
-        ws['A3'] = f"Data Inicial: {diet.initial_date.strftime('%Y-%m-%d')}"  # Preenchendo a data inicial
-        ws['A4'] = f"Data Final: {diet.final_date.strftime('%Y-%m-%d')}"  # Preenchendo a data final
+        ws['A1'] = f"Meta: {diet.goal}"
+        ws['A2'] = f"Observações: {diet.observations}"
+        ws['A3'] = f"Data Inicial: {diet.initial_date.strftime('%Y-%m-%d')}"
+        ws['A4'] = f"Data Final: {diet.final_date.strftime('%Y-%m-%d')}"
 
         # Espaçamento para cabeçalho da tabela de alimentos
         ws.append([""])
@@ -83,6 +83,11 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         # Adicionando cabeçalhos da tabela
         headers = ["Refeição", "Horário", "Alimento", "kcal", "PTN", "CHO", "LIP", "Quantidade", "Fibras (g)"]
         ws.append(headers)
+
+        # Estilo dos cabeçalhos
+        header_font = Font(bold=True)
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=6, column=col).font = header_font
 
         # Ajustando largura das colunas
         ws.column_dimensions['A'].width = 20
@@ -93,6 +98,11 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'),
                              bottom=Side(style='thin'))
 
+        # Estilos das fontes
+        font_protein = Font(color="FF69B4")  # Rosa
+        font_carbs = Font(color="00FF00")  # Verde
+        font_fat = Font(color="FFFF00")  # Amarelo
+
         row_num = 7
         for meal in diet.meals.all():
             first_row = row_num
@@ -102,44 +112,48 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
             if isinstance(foods, list) and foods:
                 for food in foods:
                     ws.append([
-                        meal.name,  # Nome da refeição
-                        meal.time,  # Horário da refeição
-                        food.get('food_description', ''),  # Nome do alimento
-                        food.get('energy_kcal', 0),  # Valor calórico
-                        food.get('protein', 0),  # Proteínas
-                        food.get('carbohydrates', 0),  # Carboidratos
-                        food.get('lipids', 0),  # Lipídios
-                        food.get('quantity', 0),  # Quantidade
-                        food.get('dietary_fiber', 0)  # Fibras
+                        meal.name,
+                        meal.time,
+                        food.get('food_description', ''),
+                        food.get('energy_kcal', 0),
+                        food.get('protein', 0),
+                        food.get('carbohydrates', 0),
+                        food.get('lipids', 0),
+                        food.get('quantity', 0),
+                        food.get('dietary_fiber', 0)
                     ])
                     row_num += 1
             else:
                 # Caso não tenha alimentos na refeição
                 ws.append([
-                    meal.name,  # Nome da refeição
-                    meal.time,  # Horário da refeição
-                    "Sem alimentos",  # Indicação de que não há alimentos
-                    '', '', '', '', '', ''  # Células vazias para as colunas de nutrientes
+                    meal.name,
+                    meal.time,
+                    "Sem alimentos",
+                    '', '', '', '', '', ''
                 ])
                 row_num += 1
 
             # Verificar se a refeição tem mais de um alimento antes de mesclar
             if row_num - first_row > 1:
-                ws.merge_cells(start_row=first_row, start_column=1, end_row=row_num - 1,
-                               end_column=1)  # Mesclando "Refeição"
-                ws.merge_cells(start_row=first_row, start_column=2, end_row=row_num - 1,
-                               end_column=2)  # Mesclando "Horário"
+                ws.merge_cells(start_row=first_row, start_column=1, end_row=row_num - 1, end_column=1)
+                ws.merge_cells(start_row=first_row, start_column=2, end_row=row_num - 1, end_column=2)
 
             # Aplicando bordas e alinhamento às células
             for col in range(1, len(headers) + 1):
                 for row in range(first_row, row_num):
-                    ws.cell(row=row, column=col).border = thin_border
-                    ws.cell(row=row, column=col).alignment = Alignment(horizontal='center', vertical='center')
+                    cell = ws.cell(row=row, column=col)
+                    cell.border = thin_border
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
 
             # Adicionar informações do MealMacrosSheet
             meal_macros = meal.meal_macros_sheet
             ws.append(
-                ["", "", "Macros da Refeição", meal_macros.kcal, meal_macros.ptn, meal_macros.cho, meal_macros.fat])
+                ["", "", "Macros da Refeição", meal_macros.kcal, meal_macros.ptn, meal_macros.cho, meal_macros.fat]
+            )
+            row_num += 1
+
+            # Adicionar uma linha em branco após os macros da refeição
+            ws.append([""])
             row_num += 1
 
         # Adicionar espaço após as refeições
@@ -151,6 +165,20 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         ws.append(["", "", "Macros da Dieta", diet_macros.kcal, diet_macros.ptn, diet_macros.cho, diet_macros.fat])
         ws.append(["", "", "Proporções", f"CHO: {diet_macros.cho_proportion}%", f"PTN: {diet_macros.ptn_proportion}%",
                    f"FAT: {diet_macros.fat_proportion}%"])
+
+        # Adicionar uma linha em branco após os macros da dieta
+        ws.append([""])
+        row_num += 1
+
+        # Aplicar cores às fontes dos valores de macro
+        for row in ws.iter_rows(min_row=7, min_col=4, max_col=9):
+            for cell in row:
+                if 'CHO' in ws.cell(row=6, column=cell.column).value:
+                    cell.font = font_carbs
+                elif 'PTN' in ws.cell(row=6, column=cell.column).value:
+                    cell.font = font_protein
+                elif 'LIP' in ws.cell(row=6, column=cell.column).value:
+                    cell.font = font_fat
 
         # Salvando o arquivo
         wb.save(response)
