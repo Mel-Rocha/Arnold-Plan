@@ -1,8 +1,9 @@
-from rest_framework import status
 from openpyxl import Workbook
+from rest_framework import status
 from django.http import HttpResponse
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from openpyxl.styles import Border, Side, Alignment
 from rest_framework.permissions import IsAuthenticated
 
 from apps.diet.models import Diet
@@ -50,27 +51,71 @@ class DietViewSet(AthleteNutritionistPermissionMixin):
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename=diet_{diet.id}.xlsx'
 
+        # Criação da planilha
         wb = Workbook()
         ws = wb.active
         ws.title = "Diet"
 
-        headers = ["Refeição", "Horário", "Alimento", "kcal", "Proteína (g)", "Carboidráto (g)",
-                   "Lipideos (g)", "Quantidade (g)", "Fibras (g)"]
+        # Adicionando meta, observações e datas
+        ws['A1'] = "Meta"
+        ws['A2'] = "Observações"
+        ws['A3'] = "Data Inicial"
+        ws['A4'] = "Data Final"
+        ws.merge_cells('A1:B1')
+        ws.merge_cells('A2:B2')
+        ws.merge_cells('A3:B3')
+        ws.merge_cells('A4:B4')
+
+        # Espaçamento para cabeçalho da tabela de alimentos
+        ws.append([""])
+
+        # Adicionando cabeçalhos da tabela
+        headers = ["Refeição", "Horário", "Alimento", "kcal", "PTN", "CHO", "LIP", "Quantidade", "Fibras (g)"]
         ws.append(headers)
 
-        for meal in diet.meals.all():
-            for food in meal.foods:
-                ws.append([
-                    meal.name,
-                    meal.time,
-                    food['food_description'],
-                    food['energy_kcal'],
-                    food['protein'],
-                    food['carbohydrates'],
-                    food['lipids'],
-                    food['quantity'],
-                    food['dietary_fiber']
-                ])
+        # Ajustando largura das colunas
+        ws.column_dimensions['A'].width = 20
+        ws.column_dimensions['B'].width = 15
+        ws.column_dimensions['C'].width = 40
 
+        # Estilo das bordas
+        thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'),
+                             bottom=Side(style='thin'))
+
+        row_num = 7
+        for meal in diet.meals.all():
+            first_row = row_num
+            foods = meal.foods  # Acessando os alimentos da refeição (JSONField)
+
+            # Verificar se foods é uma lista de dicionários
+            if isinstance(foods, list):
+                for food in foods:
+                    ws.append([
+                        meal.name,  # Nome da refeição
+                        meal.time,  # Horário da refeição
+                        food.get('food_description', ''),  # Nome do alimento
+                        food.get('energy_kcal', 0),  # Valor calórico
+                        food.get('protein', 0),  # Proteínas
+                        food.get('carbohydrates', 0),  # Carboidratos
+                        food.get('lipids', 0),  # Lipídios
+                        food.get('quantity', 0),  # Quantidade
+                        food.get('dietary_fiber', 0)  # Fibras
+                    ])
+                    row_num += 1
+
+            # Verificar se a refeição tem mais de um alimento antes de mesclar
+            if row_num - first_row > 1:
+                ws.merge_cells(start_row=first_row, start_column=1, end_row=row_num - 1,
+                               end_column=1)  # Mesclando "Refeição"
+                ws.merge_cells(start_row=first_row, start_column=2, end_row=row_num - 1,
+                               end_column=2)  # Mesclando "Horário"
+
+            # Aplicando bordas e alinhamento às células
+            for col in range(1, len(headers) + 1):
+                for row in range(first_row, row_num):
+                    ws.cell(row=row, column=col).border = thin_border
+                    ws.cell(row=row, column=col).alignment = Alignment(horizontal='center', vertical='center')
+
+        # Salvando o arquivo no response
         wb.save(response)
         return response
