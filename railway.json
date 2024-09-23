@@ -1,0 +1,43 @@
+{
+  "build": {
+    "dockerfilePath": "Dockerfile",
+    "context": "."
+  },
+  "deploy": {
+    "services": {
+      "django": {
+        "startCommand": "sh ./docker-entrypoint.sh",
+        "ports": [8000],
+        "envVars": {
+          "DJANGO_SETTINGS_MODULE": "arnold.settings"
+        },
+        "dependsOn": ["db_local", "db_taco"]
+      },
+      "nginx": {
+        "startCommand": "nginx -g 'daemon off;'",
+        "ports": [8080, 8443],
+        "dependsOn": ["django"]
+      },
+      "db_local": {
+        "image": "postgres:latest",
+        "startCommand": "postgres",
+        "envVars": {
+          "POSTGRES_DB": "local_db",
+          "POSTGRES_USER": "local_user",
+          "POSTGRES_PASSWORD": "local_password"
+        },
+        "ports": [5432]
+      },
+      "db_taco": {
+        "image": "postgres:latest",
+        "startCommand": "postgres",
+        "envVars": {
+          "POSTGRES_DB": "taco_db",
+          "POSTGRES_USER": "taco_user",
+          "POSTGRES_PASSWORD": "taco_password"
+        },
+        "ports": [5433]
+      }
+    }
+  }
+}

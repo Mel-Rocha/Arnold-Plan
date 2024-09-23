@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  django:
+    container_name: arnold_django
+    build: .
+    entrypoint: sh ./docker-entrypoint.sh
+    volumes:
+      - .:/app
+    expose:
+      - 8000
+    env_file:
+      - .env
+    networks:
+      - arnold_network
+    depends_on:
+      - db_local
+      - db_taco
+
+  nginx:
+    image: nginx:latest
+    container_name: arnold_nginx
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - django
+    env_file:
+      - .env
+    networks:
+      - arnold_network
+
+  db_local:
+    image: postgres:latest
+    container_name: db_local
+    environment:
+      POSTGRES_DB: local_db
+      POSTGRES_USER: local_user
+      POSTGRES_PASSWORD: local_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_data_local:/var/lib/postgresql/data
+    networks:
+      - arnold_network
+
+  db_taco:
+    image: postgres:latest
+    container_name: db_taco
+    environment:
+      POSTGRES_DB: taco_db
+      POSTGRES_USER: taco_user
+      POSTGRES_PASSWORD: taco_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./db_data_taco:/var/lib/postgresql/data
+    networks:
+      - arnold_network
+
+networks:
+  arnold_network:
+    driver: bridge
