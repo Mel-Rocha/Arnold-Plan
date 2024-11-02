@@ -68,6 +68,7 @@ requests==2.32.3
 rich==13.8.0
 ruamel.yaml==0.18.6
 ruamel.yaml.clib==0.2.8
+setuptools==75.3.0
 six==1.16.0
 sortedcontainers==2.4.0
 sqlparse==0.5.1
